@@ -1,11 +1,11 @@
 /* General Styles */
 /* cart */
 /* Counter styling */
-.thumbnail{
-  width: 100px ;
+.thumbnail {
+  width: 100px;
   object-fit: cover;
 }
-.activee{
+.activee {
   background-color: #000 !important;
   color: #ccc;
 }
@@ -78,7 +78,6 @@
   z-index: 1001;
 }
 
-
 .cart-count,
 .wishlist-count {
   position: absolute;
@@ -96,9 +95,6 @@
   right: -2px;
 }
 
-#sidebar-menu {
-  margin-top: 140px;
-}
 /* Position relative to icon */
 .nav-links-3 li {
   position: relative;
@@ -187,7 +183,7 @@ body {
   transform: rotate(-45deg);
   top: 20px;
   left: -35px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
   font-size: 12px;
 }
 /* ... */
@@ -225,7 +221,7 @@ body {
   margin: 0px;
   margin-left: -13.5px;
   margin-right: -13.5px;
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.1); /* Soft shadow */
   align-items: center;
   /* border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc; */
@@ -366,10 +362,10 @@ body {
   margin: 0;
 }
 
-.nav-links-3 a  {
+.nav-links-3 a {
   padding: 10px;
 }
-.nav-links-3 .bi  {
+.nav-links-3 .bi {
   font-weight: bold;
   font-size: 24px;
 }
@@ -387,11 +383,11 @@ body {
 /* Hero Section */
 .hero {
   background: linear-gradient(
-          to bottom,
-          rgba(39, 39, 37, 0.553),
-          rgba(39, 39, 37, 0.553)
-      ),
-      url("../IMG/pexels-kish-1488463.jpg");
+      to bottom,
+      rgba(39, 39, 37, 0.553),
+      rgba(39, 39, 37, 0.553)
+    ),
+    url("../IMG/pexels-kish-1488463.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -444,7 +440,7 @@ body {
   display: flex;
   justify-content: center;
 }
-.sub-text{
+.sub-text {
   color: gray;
 }
 .hero-image img {
@@ -584,6 +580,10 @@ body {
 .category-filters {
   margin-bottom: 20px;
 }
+#filter-btn {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
 .filter-btn {
   background: none;
   border: none;
@@ -667,7 +667,7 @@ body {
 
 #filter-section {
   display: none;
-  background: rgb(223, 206, 162) !important;
+  background: rgb(213, 213, 213) !important;
   padding: 20px;
   border-radius: 5px;
 }
@@ -753,26 +753,33 @@ body {
   overflow-y: scroll;
   overflow-x: hidden;
 }
+#orders .row {
+  height: 90vh;
+}
 
 /* Hide links initially on mobile */
 @media screen and (max-width: 768px) {
+  #orders {
+    width: 100%;
+  }
+
   .hero {
     background: none;
-}
+  }
 
-.hero-image {
+  .hero-image {
     display: none;
-}
+  }
 
-.image-slider {
+  .image-slider {
     display: block;
     position: relative;
     width: 100%;
     height: 300px;
     overflow: hidden;
-}
+  }
 
-.slide {
+  .slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -782,20 +789,20 @@ body {
     background-position: center;
     opacity: 0;
     transition: opacity 1s ease-in-out;
-}
-  .hero-image{
+  }
+  .hero-image {
     display: none;
   }
-  .navbar .container{
+  .navbar .container {
     padding-left: 20px;
     padding-right: 20px;
   }
 
-  .small-ss{
+  .small-ss {
     display: none;
   }
-  .category{
-    margin-top: -100px;
+  .category {
+    margin-top: -60px;
   }
   .category-item {
     display: flex;
@@ -810,18 +817,18 @@ body {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
     transition: box-shadow 0.3s ease, transform 0.3s ease;
   }
-  .category-image{
+  .category-image {
     height: 50px;
     width: 50px;
   }
-  .category-text .sub-text{
-    /* display: none; */
+  .category-text .sub-text {
+    margin-top: -10px;
+    font-size: 10px;
+  }
+  .category-text .main-text {
     font-size: 12px;
   }
-  .category-text .main-text{
-    font-size: 14px;
-  }
-  .category-filters button{
+  .category-filters button {
     font-size: 12px;
   }
   .hero .container {
@@ -853,20 +860,17 @@ body {
     object-fit: cover;
     clip-path: ellipse(50% 35% at center); /* Avocado-like shape */
   }
-  .product-overview h4{
+  .product-overview h4 {
     font-size: 16px;
   }
-  .category-filters
-  .pdetailpics > img {
+  .category-filters .pdetailpics > img {
     height: 400px;
     width: 100%;
     object-fit: cover;
   }
-  #filter-section {
-    overflow-x: scroll;
-  }
   #filter-section a {
     text-decoration: none;
+    font-size: 13px;
   }
 
   /* cart shop product */
@@ -894,7 +898,7 @@ body {
     text-overflow: ellipsis;
     max-width: 100%;
   }
-  .product-item a img{
+  .product-item a img {
     width: 100%;
     padding: 7px;
   }
@@ -919,7 +923,7 @@ body {
     font-size: 14px;
     padding: 0px 6px;
   }
-  .nav-links-3 a .bi{
+  .nav-links-3 a .bi {
     font-size: 20px;
   }
 }

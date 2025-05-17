@@ -34,7 +34,7 @@
 
       <!-- Main Content -->
       <main class="main-content">
-        <h2 class="greeting" style="text-align: right;">Welcome, <%= user.fullname %>!</h2>
+        <h2 class="greeting mt-2" style="text-align: right;">Welcome, <%= user.fullname %>!</h2>
 
         <!-- Sections -->
         <div id="profile" class="content-section active">
@@ -148,7 +148,7 @@
           <h3>My Orders</h3>
           <p>Track the status of your payments and orders below.</p>
 
-          <div class="row" style="height: 90vh; position: relative;">
+          <div class="row">
 
             <!-- Payments Section -->
             <div class="col-md-6 col-12">
@@ -212,7 +212,7 @@
             </div>
 
             <!-- Delivery Status Section -->
-            <div class="col-md-6 col-12">
+            <div class="col-md-6 col-12 deli">
               <h5 class="text-dark">Delivery Status</h5>
               <ul id="delivery-status" class="list-group scrollable-list">
                 <!-- Pending Delivery Orders - Newest First -->

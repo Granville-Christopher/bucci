@@ -83,9 +83,7 @@ if (navToggle) {
 function handlePDetailsWishlist(button) {
   const productId = document.getElementById("product-id").value.trim();
   const productName = document.querySelector("h2").textContent.trim();
-  const productPrice = document
-    .querySelector(".product-price")
-    .textContent.trim();
+  
   const productImage = document.getElementById("main-product-img").src;
 
   let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
@@ -97,7 +95,6 @@ function handlePDetailsWishlist(button) {
     wishlist.push({
       id: productId,
       name: productName,
-      price: productPrice,
       image: productImage,
     });
     button.classList.add("activer");
@@ -136,7 +133,6 @@ function addToWishlist(button) {
     id: productItem.querySelector("h3 a").textContent.trim(),
     name: productItem.querySelector("h5 a").textContent.trim(),
     image: productItem.querySelector("img").src,
-    price: productItem.querySelector("p").textContent.trim(),
     view: productItem.querySelector("h4").textContent.trim(),
     link: productItem.querySelector("h5 a").getAttribute("href"),
   };
@@ -424,10 +420,9 @@ function loadWishlist() {
               </div>
               <div class="col-4">
                 <h6>${product.name}</h6>
-                <p>${product.price}</p>
               </div>
               <div class="col-4">
-                <a href="${product.link}" data-index="${index}">View Item</a>
+                <a class="btn" href="${product.link}" data-index="${index}">View Item</a>
               </div>
               <div class="col-2 text-end">
                 <button class="btn btn-sm btn-danger remove-wishlist" data-index="${index}">✖</button>
