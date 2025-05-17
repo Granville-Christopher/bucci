@@ -794,6 +794,9 @@ body {
   .small-ss{
     display: none;
   }
+  .category{
+    margin-top: -100px;
+  }
   .category-item {
     display: flex;
     align-items: center;
