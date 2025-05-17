@@ -1,0 +1,305 @@
+/* General styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #eee !important;
+}
+
+/* Account container */
+.account-container {
+  margin-top: 90px;
+}
+.account-container-2 {
+  display: flex;
+  max-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  margin-top: 90px;
+  background: #333;
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out;
+}
+
+/* Collapsed sidebar (large screens) */
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed .menu-text {
+  display: none; /* Hide text when collapsed */
+}
+
+/* Sidebar toggle button */
+.toggle-btn {
+  position: fixed;
+  margin-top: -20px;
+  left: 10px;
+  background: none;
+  border: none;
+  /* color: red; */
+  font-size: 20px;
+  /* z-index: 10; */
+  cursor: pointer;
+  display: none;
+}
+
+/* Sidebar menu */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-menu li {
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.3s ease-in-out;
+}
+
+.sidebar-menu li:hover {
+  background: #d6d6d6;
+  padding: 10px;
+  color: black;
+}
+
+.sidebar-menu li {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.sidebar-menu li.active {
+  background: #eeeeee;
+  /* background: #ff6600; Primary color */
+  color: black; 
+  font-weight: bold;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-top: -20px;
+  margin-left: 250px;
+  transition: margin-left 0.3s ease-in-out;
+}
+.main-content h2{
+  font-size: 20px;
+}
+#orders{
+  position: fixed;
+  width: 81.5%;
+  max-height: 75vh;
+}
+.list-group {
+  max-height:  50vh; /* Limit height to prevent affecting full layout */
+  overflow-y: scroll; /* Enables independent scrolling */
+  scrollbar-width: thin; /* Make scrollbar thinner */
+}
+
+.list-group::-webkit-scrollbar {
+  width: 6px; /* Adjust scrollbar width */
+}
+
+.list-group::-webkit-scrollbar-thumb {
+  background: #ccc; /* Style scrollbar thumb */
+  border-radius: 3px;
+}
+
+.list-group::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Style scrollbar track */
+}
+
+/* Content Sections */
+.content-section {
+  display: none;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Show active section */
+.content-section.active {
+  display: block;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile View */
+@media (max-width: 768px) {
+  .toggle-btn {
+    display: block; /* Show toggle button */
+    position: fixed;
+    margin-top: -50px;
+    left: 0px;
+    /* z-index: 1; */
+  }
+  .content-section h3{
+    font-size: 14px;
+  }
+  .content-section{
+    margin-top: 0px;
+  }
+  .sidebar {
+    position: fixed;
+    left: -250px;
+    height: 100%;
+    z-index: 999;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+  .account-container .account-container-2 {
+    margin-top: 140px;
+  }
+  .main-content h2{
+    font-size: 16px;
+  }
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    margin-top: -70px;
+    margin-left: 0px;
+    transition: margin-left 0.3s ease-in-out;
+  }
+}
+
+/* profile */
+/* Edit Button */
+#profile .btn {
+  /* background: #cc0000; Your primary button color */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+#profile .btn:hover {
+  opacity: 0.8;
+}
+
+#profile .btn.cancel {
+  background: #888;
+}
+
+/* delivery address update */
+/* Edit Form (Hidden by Default) */
+#address .edit-form {
+  display: none;
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-in-out;
+}
+
+/* Input Fields */
+#address .edit-form input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#address .edit-btn {
+  background-color: #ff6600; /* Primary button color */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+#address .edit-btn:hover {
+  background-color: #ff6600d9;
+}
+
+#address .edit-form {
+  display: none;
+  margin-top: 10px;
+}
+
+#address .edit-form.active {
+  display: block;
+}
+
+#address .edit-form input {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+#address .edit-form button {
+  background-color: #ff6600;
+  color: white;
+  border-radius: 5px;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+}
+
+#address .edit-form button:hover {
+  background-color: #ff6600d9;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-container.right {
+  align-self: flex-end;
+  max-width: 70%;
+}
+
+.sender {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.message-box {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 8px;
+  display: inline-block;
+}
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

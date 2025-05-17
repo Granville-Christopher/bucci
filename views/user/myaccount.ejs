@@ -1,0 +1,365 @@
+<%- include("partials/header.ejs") %>
+
+  <div class="account-container">
+    <!-- Sidebar Toggle Button (Only for small screens) -->
+
+    <button class="toggle-btn" id="sidebar-toggle">
+      <i class="fas fa-bars"></i>
+    </button>
+
+
+    <div class="account-container-2">
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar-menu">
+
+        <ul class="sidebar-menu">
+          <li class="active" onclick="showSection('profile', event)"><i class="fas fa-user"></i> My Profile
+          </li>
+          <li onclick="showSection('address', event)"><i class="fas fa-map-marker-alt"></i> Delivery Address
+          </li>
+          <li onclick="showSection('orders', event)"><i class="fas fa-shopping-cart"></i> My Orders</li>
+          <li onclick="showSection('recently-viewed', event)"><i class="fas fa-eye"></i> Recently Viewed</li>
+          <li onclick="showSection('wishlist', event)"><i class="fas fa-heart"></i> Wishlist</li>
+          <li onclick="showSection('support', event)"><i class="fas fa-headset"></i> Support & Help</li>
+          <li onclick="showSection('change-password', event)"><i class="fas fa-lock"></i> Change Password</li>
+          <div class=" " style="margin-top: 50px; margin-left: 10px;">
+            <button class="btn btn-primary" style="padding: 5px 20px; font-size: smaller;"><i
+                class="fas fa-sign-out-alt"></i> Log Out</button>
+
+          </div>
+        </ul>
+
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <h2 class="greeting" style="text-align: right;">Welcome, <%= user.fullname %>!</h2>
+
+        <!-- Sections -->
+        <div id="profile" class="content-section active">
+          <h3>My Profile</h3>
+          <p><strong>Name:</strong>
+            <%= user.fullname %>
+          </p>
+          <p><strong>Email:</strong> <span id="email-text">
+              <%= user.email %>
+            </span></p>
+          <p><strong>Phone:</strong> <span id="email-text">
+              <%= user.phone %>
+            </span></p>
+
+          <!-- Edit Button -->
+          <button id="edit-btn" class="btn btn-primary">Edit</button>
+
+          <!-- Hidden Edit Form -->
+          <div id="edit-form" class="edit-form mt-4">
+            <label>Email:</label>
+            <input type="email" id="email-input" class="form-control" value="granville@example.com">
+
+            <label>Phone:</label>
+            <input type="text" id="phone-input" class="form-control" value="+2349133871053">
+
+            <button id="save-btn " class="btn btn-primary">Save</button>
+            <button id="cancel-btn" class="btn cancel">Cancel</button>
+          </div>
+        </div>
+
+
+        <div id="address" class="content-section">
+          <h3>Delivery Address</h3>
+          <% if (message) { %>
+            <div class="alert-message">
+              <%= message %>
+            </div>
+            <% } %>
+
+              <% if (!deliveryAddress) { %>
+                <p>No delivery address found.</p>
+                <button class="edit-btn" onclick="toggleEditForm('address-edit')">Add address</button>
+                <% } else { %>
+                  <p><strong>House Number:</strong>
+                    <%= deliveryAddress.houseNumber %>
+                  </p>
+                  <p><strong>Street:</strong>
+                    <%= deliveryAddress.street %>
+                  </p>
+                  <p><strong>Town:</strong>
+                    <%= deliveryAddress.town %>
+                  </p>
+                  <p><strong>City:</strong>
+                    <%= deliveryAddress.city %>
+                  </p>
+                  <p><strong>State:</strong>
+                    <%= deliveryAddress.state %>
+                  </p>
+                  <p><strong>Postal Code:</strong>
+                    <%= deliveryAddress.postalCode %>
+                  </p>
+                  <% if (deliveryAddress.landmark) { %>
+                    <p><strong>Landmark:</strong>
+                      <%= deliveryAddress.landmark %>
+                    </p>
+                    <% } %>
+                      <button class="edit-btn" onclick="toggleEditForm('address-edit')">Update address</button>
+                      <% } %>
+
+                        <!-- Hidden Edit Form -->
+                        <div id="address-edit" class="edit-form">
+                          <form action="/register-address" method="post">
+                            <label for="house-number">House Number:</label>
+                            <input type="text" name="houseNumber" id="house-number" class="form-control"
+                              placeholder="Enter house number" required>
+
+                            <label for="street">Street:</label>
+                            <input type="text" name="street" id="street" class="form-control" placeholder="Enter street"
+                              required>
+
+                            <label for="town">Town:</label>
+                            <input type="text" name="town" id="town" class="form-control" placeholder="Enter town"
+                              required>
+
+                            <label for="city">City:</label>
+                            <input type="text" name="city" id="city" class="form-control" placeholder="Enter city"
+                              required>
+
+                            <label for="state">State:</label>
+                            <input type="text" name="state" id="state" class="form-control" placeholder="Enter state"
+                              required>
+
+                            <label for="postal-code">Postal Code:</label>
+                            <input type="text" name="postalCode" id="postal-code" class="form-control"
+                              placeholder="Enter postal code" required>
+
+                            <!-- <label for="country">Country:</label>
+                            <input type="text" name="country" id="country" class="form-control" placeholder="Enter country" required>
+                           -->
+                            <label for="landmark">Landmark (optional):</label>
+                            <input type="text" name="landmark" id="landmark" class="form-control"
+                              placeholder="Enter nearby landmark">
+
+                            <button class="btn btn-primary">Save</button>
+                          </form>
+                        </div>
+        </div>
+
+
+        <div id="orders" class="content-section">
+          <h3>My Orders</h3>
+          <p>Track the status of your payments and orders below.</p>
+
+          <div class="row" style="height: 90vh; position: relative;">
+
+            <!-- Payments Section -->
+            <div class="col-md-6 col-12">
+              <h5 class="text-dark">Payments</h5>
+              <ul id="payments" class="list-group scrollable-list">
+                <!-- Completed Payments - Newest First -->
+                <% if (!completedPayments || completedPayments.length===0) { %>
+                  <li class="list-group-item">No completed payments yet.</li>
+                  <% } else { %>
+                    <% completedPayments.sort((a, b)=> new Date(b.paymentDate) - new
+                      Date(a.paymentDate)).forEach(function(payment) { %>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>Payment ID:</strong>
+                          <%= payment.paymentReference %> <br>
+                            <strong>Items:</strong>
+                            <ul>
+                              <% payment.items.forEach(function(item) { %>
+                                <li>
+                                  <%= item.name %> - <%= item.quantity %> x <%= item.price %>
+                                </li>
+                                <% }); %>
+                            </ul>
+                            <strong>Total:</strong> ₦<%= payment.totalAmount %> <br>
+                              <strong>Date:</strong>
+                              <%= payment.paymentDate ? new Date(payment.paymentDate).toDateString() : 'N/A' %>
+                        </div>
+                        <span class="badge bg-success">Completed</span>
+                      </li>
+                      <% }); %>
+                        <% } %>
+
+                          <!-- Failed Payments - Newest First -->
+                          <% if (!failedPayments || failedPayments.length===0) { %>
+                            <li class="list-group-item">No failed payments yet.</li>
+                            <% } else { %>
+                              <% failedPayments.sort((a, b)=> new Date(b.paymentDate) - new
+                                Date(a.paymentDate)).forEach(function(payment) { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <strong>Payment ID:</strong>
+                                    <%= payment.paymentReference %> <br>
+                                      <strong>Items:</strong>
+                                      <ul>
+                                        <% payment.items.forEach(function(item) { %>
+                                          <li>
+                                            <%= item.name %> - <%= item.quantity %> x <%= item.price %>
+                                          </li>
+                                          <% }); %>
+                                      </ul>
+                                      <strong>Total:</strong> ₦<%= payment.totalAmount %> <br>
+                                        <strong>Date:</strong>
+                                        <%= payment.paymentDate ? new Date(payment.paymentDate).toDateString() : 'N/A'
+                                          %>
+                                  </div>
+                                  <span class="badge bg-danger">Failed</span>
+                                </li>
+                                <% }); %>
+                                  <% } %>
+              </ul>
+            </div>
+
+            <!-- Delivery Status Section -->
+            <div class="col-md-6 col-12">
+              <h5 class="text-dark">Delivery Status</h5>
+              <ul id="delivery-status" class="list-group scrollable-list">
+                <!-- Pending Delivery Orders - Newest First -->
+                <% if (!pendingDeliveryOrders || pendingDeliveryOrders.length===0) { %>
+                  <li class="list-group-item">No pending deliveries yet.</li>
+                  <% } else { %>
+                    <% pendingDeliveryOrders.sort((a, b)=> new Date(b.orderDate) - new
+                      Date(a.orderDate)).forEach(function(order) { %>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>Order ID:</strong>
+                          <%= order.paymentReference %> <br>
+                            <strong>Items:</strong>
+                            <ul>
+                              <% order.items.forEach(function(item) { %>
+                                <li>
+                                  <%= item.name %> - <%= item.quantity %> x <%= item.price.toLocaleString() %>
+                                </li>
+                                <% }); %>
+                            </ul>
+                            <strong>Total:</strong> ₦<%= order.totalAmount.toLocaleString() %> <br>
+                              <strong>Order Date:</strong>
+                              <%= order.orderDate ? new Date(order.orderDate).toDateString() : 'N/A' %>
+                        </div>
+                        <span class="badge bg-warning">Pending Delivery</span>
+                      </li>
+                      <% }); %>
+                        <% } %>
+
+                          <!-- Delivered Orders - Newest First -->
+                          <% if (!deliveredOrders || deliveredOrders.length===0) { %>
+                            <li class="list-group-item">No delivered orders yet.</li>
+                            <% } else { %>
+                              <% deliveredOrders.sort((a, b)=> new Date(b.deliveryDate) - new
+                                Date(a.deliveryDate)).forEach(function(order) { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <strong>Order ID:</strong>
+                                    <%= order.paymentReference %> <br>
+                                      <strong>Items:</strong>
+                                      <ul>
+                                        <% order.items.forEach(function(item) { %>
+                                          <li>
+                                            <%= item.name %> - <%= item.quantity %> x <%= item.price.toLocaleString() %>
+                                          </li>
+                                          <% }); %>
+                                      </ul>
+                                      <strong>Total:</strong> ₦<%= order.totalAmount.toLocaleString() %> <br>
+                                        <strong>Delivery Date:</strong>
+                                        <%= order.deliveryDate ? new Date(order.deliveryDate).toDateString() : 'N/A' %>
+                                  </div>
+                                  <span class="badge bg-success">Delivered</span>
+                                </li>
+                                <% }); %>
+                                  <% } %>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+
+
+        <div id="recently-viewed" class="content-section">
+          <p>Recently checked items.</p>
+          <div class="row justify-content-start products" id="recently-viewed-items"></div>
+        </div>
+
+
+        <div id="wishlist" class="content-section">
+          <h3>Wishlist</h3>
+          <button id="remove-all-wishlist" class="btn btn-danger mt-3 mb-3">Remove All</button>
+          <p id="empty-wishlist-msg">Your wishlist is empty.</p>
+
+          <div id="wishlist-container" class="wishlist-items">
+          </div>
+        </div>
+
+        <div id="support" class="content-section">
+          <h3>Support & Help</h3>
+          <p>Need assistance? Contact us.</p>
+          <div class="contacts row">
+            <div class="col-md-6">
+              <div class="email mb-2">
+                <a href="mailto:support@Bucci.com">support@Bucci.com</a>
+              </div>
+              <div class="phone">
+                <a href="tel:+2349076262053">+2349076262053</a>
+              </div>
+              <div class="mt-5">
+                <h5>Send us a message here</h5>
+                <form action="" method="" id="myaccountmessage">
+                    <div class="alert-message-container"></div>
+                    <input type="hidden" id="userId" value="<%= user._id %>">
+                    <div class="input-group">
+                      <input id="userMessageInput" name="text" class="form-control" placeholder="Type a message..." />
+                      <button class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+              </div>
+            </div>
+            <div class="col-md-6 mt-4 mt-sm-0">
+              <div class="display-messages">
+                <h5>Messages</h5>
+                <div class="messages">
+                  <div class="chat-messages mb-3" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+        <div id="change-password" class="content-section">
+          <h3>Change Password</h3>
+          <p>Update your security settings.</p>
+
+          <form id="change-password-form">
+            <div class="mb-3">
+              <label for="current-password" class="form-label">Current Password</label>
+              <input type="password" id="current-password" class="form-control" placeholder="Enter current password"
+                required>
+            </div>
+
+            <div class="mb-3">
+              <label for="new-password" class="form-label">New Password</label>
+              <input type="password" id="new-password" class="form-control" placeholder="Enter new password" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirm-password" class="form-label">Confirm New Password</label>
+              <input type="password" id="confirm-password" class="form-control" placeholder="Confirm new password"
+                required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Password</button>
+          </form>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+
+
+
+
+
+  <%- include("partials/footer.ejs") %>

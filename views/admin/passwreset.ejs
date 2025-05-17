@@ -1,0 +1,44 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container">
+        <div class="admin-main  fixed-top px-2 py-2">
+            <center>
+                <h2 class=" ">Welcome, Admin</h2>
+            </center>
+
+        </div>
+        <div class="d-flex justify-content-center">
+            <div class="reset-container ">
+                <div class="login-box">
+                    <div id="resetpassword">
+                        <div class=" p-4">
+                            <h3 class="text-center mb-3">Reset Password</h3>
+                            
+                            <% if (message) { %>
+                                <div class="alert alert-info">
+                                  <%= message %>
+                                </div>
+                              <% } %>
+                              
+                            <form method="POST" action="/admin/request-otp">
+                                <input type="email" name="email" placeholder="Enter your email" required>
+                                <button type="submit" class="my-2 rounded">Get OTP</button>
+                            </form>
+
+                            <form method="POST" action="/admin/reset-password">
+                                <input class="my-2" type="email" name="email" placeholder="Enter your email" required>
+                                <input class="my-2" type="text" name="otp" placeholder="Enter OTP" required>
+                                <input class="my-2" type="password" name="newPassword" placeholder="New Password" required>
+                                <input class="my-2" type="password" name="confirmPassword" placeholder="Confirm Password" required>
+                                <button type="submit" class="my-2 rounded">Reset Password</button>
+                            </form>
+        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+    <%- include("partials/footer.ejs") %>

@@ -1,0 +1,98 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="admin-main fixed-top px-2 py-2">
+        <div class="admin-welcome d-flex justify-content-between align-items-center">
+            <h2 class="welcome-admin"> Welcome, <%= admin ? admin.fullname : 'Guest' %>
+            </h2>
+            
+            <% if (message) { %>
+                <div id="session-message" class="alert-message alert alert-info container py-1"
+                    style="width: fit-content;">
+                    <%= message %>
+                </div>
+
+                <script>
+                    setTimeout(() => {
+                        const messageBox = document.getElementById("session-message");
+                        if (messageBox) {
+                            messageBox.style.transition = "opacity 0.5s";
+                            messageBox.style.opacity = "0";
+
+                            setTimeout(() => {
+                                messageBox.remove();
+                            }, 500);
+                        }
+                    }, 5000);
+                </script>
+                <% } %>
+                    <div class="admin-buttons">
+                        <button class="sidebar-toggle btn btn-primary me-2">
+                            <a class="text-light" href="/admin" style="text-decoration: none;"> <i class="fa-solid fa-arrow-left-long"></i></a>
+                        </button>
+                        <form action="/admin/logout" method="POST" style="display:inline;">
+                            <button class="btn btn-danger btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+        </div>
+    </div>
+    <div class="container adminproductdetailspage">
+        <div class="row">
+            <!-- Images Section -->
+            <div class="col-md-6 d-flex">
+                <div class="d-flex flex-column ms-3 mx-3">
+                    <% product.product_images.forEach((img, index)=> { %>
+                        <img src="<%= img %>" alt="Image <%= index + 1 %>" class="img-thumbnail thumbnail mb-2"
+                            style="width: 80px; cursor: pointer;">
+                        <% }) %>
+                </div>
+                <div class="flex-grow-1">
+                    <img id="mainImage" src="<%= product.product_images[0] %>" width="400"
+                        alt="<%= product.product_name %>" class="img-fluid border"
+                        style="height:600px; object-fit: contain; background-color: black; border-radius: 20px; box-shadow: 0px 1px 10px rgb(255, 255, 255);">
+                </div>
+            </div>
+
+            <!-- Product Details Section -->
+            <div class="col-md-6">
+                <p><strong>Product Name:</strong> <span id="productName">
+                        <%= product.product_name %>
+                    </span></p>
+                <p><strong>Quantity Available:</strong> <span id="quantityAvailable">
+                        <%= product.quantity %>
+                    </span></p>
+                <p><strong>Colors Available:</strong> <span id="colorsAvailable">
+                        <%= product.colors.join(", ") %></span></p>
+                <p><strong>Sizes Available:</strong> <span id=" sizesAvailable">
+                            <%= product.sizes.join(", ") %></span></p>
+                <p><strong>Price:</strong> <span id=" price"><% if (product.flashsale) { %>
+                    <span style="text-decoration: line-through; color: gray;">₦<%= product.price %></span>
+                    <span style="color: red; font-weight: bold;">₦<%= product.flashsale_price %></span>
+                  <% } else { %>
+                    ₦<%= product.price %>
+                  <% } %>
+                    </span></p>
+                <p><strong>Brand:</strong> <span id="brand">
+                        <%= product.brand %>
+                    </span></p>
+                <p><strong>Category:</strong> <span id="category">
+                        <%= product.category %>
+                    </span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for thumbnail functionality
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('mainImage');
+
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', () => {
+                mainImage.src = thumbnail.src;
+                mainImage.alt = thumbnail.alt;
+            });
+        });
+    </script>
+        <%- include("partials/footer.ejs") %>

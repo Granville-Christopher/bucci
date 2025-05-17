@@ -1,0 +1,30 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container wishlist-page">
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="index.html">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Wishlist</li>
+            </ol>
+        </nav>
+
+        <div class="container mt-5">
+            <div class="row">
+                <!-- Wishlist Items Section -->
+                <div class="">
+                    <h2>My Wishlist</h2>
+                    <p id="empty-wishlist-msg"></p>
+                    <div id="wishlist-container" class="wishlist-items">
+
+                    </div>
+                    <button id="remove-all-wishlist" class="btn btn-danger mt-3 mb-3 ">Remove All</button>
+
+                    <a href="shop" style="float: right;" class="btn btn-secondary mt-3">← Back to Shop</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include("partials/footer.ejs") %>

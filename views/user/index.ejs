@@ -1,0 +1,150 @@
+<%- include("partials/header.ejs") %>
+
+    <!-- Hero Section -->
+    <div class="hero ">
+        <div class="container">
+            <div class="hero-text">
+                <h1>All season Men's collection</h1>
+                <p><b>NEW ARRIVALS</b></p>
+                <a href="shop" class="btn btn-primary ajax-link">Shop Now</a>
+            </div>
+            <div class="hero-image">
+                <svg width="0" height="0">
+                    <defs>
+                        <clipPath id="irregularShape" clipPathUnits="objectBoundingBox">
+                            <path
+                                d="M0.5,0.05 Q0.6,0.1 0.8,0.15 T1,0.3 Q0.95,0.45 0.9,0.55 T0.85,0.7 Q0.7,0.85 0.5,0.95 T0.2,0.7 Q0.1,0.6 0.05,0.5 T0.1,0.3 Q0.2,0.15 0.4,0.1 T0.5,0.05Z" />
+                        </clipPath>
+                    </defs>
+                </svg>
+                <img src="/IMG/men/pexels-ario-stories-278509849-31154067.jpg" alt="Men's Fashion">
+            </div>
+        </div>
+    </div>
+    <!-- category section -->
+    <section class="container">
+        <div class="row justify-content-center align-items-center g-2 category">
+            <div class="col-md-4 category-item">
+                <div class="category-text">
+                    <p class="main-text">Top</p>
+                    <p class="sub-text">the best top for you</p>
+                </div>
+                <div class="category-image">
+                    <img src="/IMG/men/shirt.jpg" class="img-fluid" alt="top">
+                    <div class="overlay">
+                        <a href="shop" class="shop-now">Shop Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 category-item">
+                <div class="category-text">
+                    <p class="main-text">Shorts</p>
+                    <p class="sub-text">the best shorts for you</p>
+                </div>
+                <div class="category-image">
+                    <img src="/IMG/men/short1.avif" class="img-fluid" alt="shorts">
+                    <div class="overlay">
+                        <a href="shop" class="shop-now">Shop Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 category-item">
+                <div class="category-text">
+                    <p class="main-text">2 piece</p>
+                    <p class="sub-text">the best 2 piece for you</p>
+                </div>
+                <div class="category-image">
+                    <img src="/img/men/2piece.jpg" class="img-fluid" alt="2 piece">
+                    <div class="overlay">
+                        <a href="shop" class="shop-now">Shop Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- product overvier -->
+    <section class="product-overview container mt-5">
+        <h4 class="text-center">PRODUCT OVERVIEW</h4>
+
+        <!-- Category Filters -->
+        <div class="category-filters text-center">
+            <button class="filter-btn active" data-category="all">All Products</button>
+            <button class="filter-btn" data-category="tops">Tops</button>
+            <button class="filter-btn" data-category="shorts">Shorts</button>
+            <button class="filter-btn" data-category="2piece">2-Piece</button>
+            <button class="filter-btn" data-category="joggers">Joggers</button>
+            <button class="filter-btn" data-category="jerseys">Jerseys</button>
+            <button class="filter-btn" data-category="hats">Hats</button>
+            <button class="filter-btn" style="  background-color: rgba(223, 206, 162, 0.733); border-radius: 5px;"
+                data-category="Bucci-wears">Bucci wears</button>
+        </div>
+
+        <!-- Product Display Section -->
+        <div class="row justify-content-start products">
+            <!-- Example Product Item -->
+            <% if (featuredProducts && featuredProducts.length> 0) { %>
+                <% featuredProducts.forEach(product=> { %>
+                    <div class="col-6 col-md-3">
+                        <div class="product-item position-relative">
+
+                            <!-- Flash Sale Ribbon -->
+                            <% if (product.flashsale) { %>
+                                <div class="ribbon ribbon-top-left"><span>Flash Sale</span></div>
+                                <% } %>
+
+                                    <!-- Wishlist Button -->
+                                    <button class="wishlist-btn" onclick="addToWishlist(this)">
+                                        <i class="fa fa-heart"></i>
+                                    </button>
+
+                                    <!-- Product Image -->
+                                    <a href="/product/<%= product._id %>">
+                                        <img src="<%= product.product_images[0] %>" class="img-fluid"
+                                            alt="<%= product.product_name %>">
+                                    </a>
+
+                                    <!-- Product ID (hidden) -->
+                                    <h3><a id="id" style="display: none;">
+                                            <%= product._id %>
+                                        </a></h3>
+
+                                    <!-- Product Name -->
+                                    <h5><a href="/product/<%= product._id %>">
+                                            <%= product.product_name %>
+                                        </a></h5>
+
+                                    <!-- Product Price -->
+                                    <p class="product-price" data-flashsale="<%= product.flashsale %>"
+                                        data-flashsale-price="<%= product.flashsale_price %>"
+                                        data-price="<%= product.price %>">
+                                        <% if (product.flashsale) { %>
+                                            <span style="text-decoration: line-through; color: gray;">₦<%= product.price
+                                                    %></span>
+                                            <span style="color: red; font-weight: bold;">₦<%= product.flashsale_price %>
+                                                    </span>
+                                            <% } else { %>
+                                                ₦<%= product.price %>
+                                                    <% } %>
+                                    </p>
+
+
+                                    <!-- View Button -->
+                                    <h4 class="view-button"><a href="/product/<%= product._id %>">View This</a></h4>
+                        </div>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <p class="text-center">No products to show.</p>
+                            <% } %>
+        </div>
+
+    </section>
+    <% if (user) { %>
+        <script>
+            localStorage.setItem`('userEmail', "<%= user.email %>")`;
+        </script>
+        <% } %>
+            <%- include("partials/footer.ejs") %>

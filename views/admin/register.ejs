@@ -1,0 +1,61 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container">
+        <div class="admin-main  fixed-top px-2 py-2">
+            <center>
+                <h2 class=" ">Welcome, Admin</h2>
+            </center>
+
+        </div>
+        <div class="d-flex justify-content-center">
+            <div class="login-container">
+                <div class="login-box">
+                    <div class="left-side">
+                        <h2>Sign Up</h2>
+                        <p>Create a new Bucci account</p>
+                        <form method="post" id="signup-form" action="/admin/register">
+                            <%if (message) { %>
+                                <div class="alert-message container">
+                                    <%= message %>
+                                </div>
+                                <% } %>
+                                    <input name="fullname" type="text" class="form-control" id="Full name"
+                                        placeholder="Full Name" required>
+                                    <input name="email" type="email" class="form-control mt-3" id="eemail"
+                                        placeholder="Enter email" required>
+                                    <input name="phone" type="tel" class="form-control mt-3" id="phone"
+                                        placeholder="Enter Phone number" required>
+                                    <input name="password" type="password" class="form-control mt-3" id="password"
+                                        placeholder="Create password" required>
+                                    <input name="confirmPassword" type="password" class="form-control mt-3"
+                                        id="confirm-password" name="confirm-password" placeholder="Confirm password"
+                                        required>
+                                    <button type="submit" class="btn btn-primary mt-3">Sign Up</button>
+                        </form>
+                    </div>
+                    <div class="right-side">
+                        <h2>Welcome to Bucci!</h2>
+                        <p>Already have an account? Log in here.</p>
+                        <a href="signin" class="btn btn-primary">Sign In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        // Client-side validation for password match
+        document.getElementById("signup-form").addEventListener("submit", function (event) {
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+
+            if (password !== confirmPassword) {
+                event.preventDefault(); // Prevent form submission
+                alert("Passwords do not match!");
+            }
+        });
+
+    </script>
+    <%- include("partials/footer.ejs") %>

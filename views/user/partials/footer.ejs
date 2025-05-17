@@ -1,0 +1,126 @@
+<% if (page !=="myaccount" ) { %>
+    <footer class="bg-dark text-light py-5 mt-5 d-none d-md-block">
+        <div class="container">
+            <div class="row">
+                <!-- Categories -->
+                <div class="col-md-3">
+                    <h5 class="text-uppercase fw-bold">Categories</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Tops</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Shorts</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Jerseys</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Joggers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Help -->
+                <div class="col-md-3">
+                    <h5 class="text-uppercase fw-bold">Help</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Track Order</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Returns</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Shipping</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">FAQs</a></li>
+                    </ul>
+                </div>
+
+                <!-- Get in Touch -->
+                <div class="col-md-3">
+                    <h5 class="text-uppercase fw-bold">Get in Touch</h5>
+                    <p>Any questions? call us on <a href="tel:+2349133871053">+2349133871053</a> or send us an email at
+                        <a href="mailto:Support@Bucci.com">Support@Bucci.com</a>
+                    </p>
+                    <div>
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-pinterest fa-lg"></i></a>
+                    </div>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="col-md-3 mt-md-5">
+                    <h5 class="text-uppercase fw-bold">Newsletter</h5>
+                    <form action="/home" method="post" id="newsletterUser" class="Newsletter">
+                        <% if (message) { %>
+                            <div class="alert-message container">
+                                <%= message %>
+                            </div>
+                            <% } %>
+                                <input name="email" type="email" class="form-control bg-dark text-light border-0"
+                                    placeholder="email@example.com">
+                                <button class="btn w-100 mt-3">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Icons -->
+            <div class="text-center mt-4">
+                <i class="fa-brands fa-cc-visa fa-2x"></i>
+                <i class="fa-brands fa-cc-mastercard fa-2x"></i>
+                <i class="fa-brands fa-cc-paypal fa-2x"></i>
+                <i class="fa-brands fa-cc-discover fa-2x"></i>
+            </div>
+
+            <!-- Copyright -->
+            <div class="text-center mt-3">
+                <p class="mb-0">&copy; 2025 All rights reserved</p>
+            </div>
+        </div>
+    </footer>
+    <% } %>
+
+        <!-- FontAwesome for Icons -->
+
+
+
+
+
+        <% if (page==="cart" ) { %>
+            <script src="/js/loadcart.js"></script>
+        <% } %>
+                <% if (page==="pdetails" ) { %>
+                    <script src="/js/productdetails.js"></script>
+                <% } %>
+                        <% if (page === "shop" ) { %>
+                            <script src="/js/shop.js"></script>
+                        <% } %>
+                                <% if (page==="search" ) { %>
+                                    <script src="/js/search.js"></script>
+                                <% } %>
+                                        <% if (page==="about" ) { %>
+                                            <script src="/js/about.js"></script>
+                                        <% } %>
+                                                <% if (page==="wishlist" ) { %>
+                                                    <script src="/js/loadwishlist.js"></script>
+                                                <% } %>
+                                                        <% if (page==="myaccount" ) { %>
+                                                            <script src="/js/loadwishlist.js"></script>
+                                                        <% } %>
+                                                                <% if (page==="about" ) { %>
+                                                                    <script src="/js/about..js"></script>
+                                                                <% } %>
+                                                                        <% if (page==="myaccount" ) { %>
+                                                                            <script src="/js/myaccount.js"></script>
+                                                                        <% } %>
+                                                                        <% if (page==="cart" ) { %>
+                                                                            <script src="/js/paystack.js"></script>
+                                                                        <% } %>
+                                                                        <% if (page==="index" ) { %>
+                                                                            <script src="/js/paystack.js"></script>
+                                                                        <% } %>
+                                                                        
+                                                                            
+                                                                        
+
+                                                                                <script src="/js/ajaxnavigation.js"></script>
+                                                                                <script src="/js/animations.js"></script>
+                                                                                <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+                                                                                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+                                                                                <script src="/font/js/all.js"></script>
+                                                                                <script src="/js/myaccount.js"></script>
+                                                                                <script src="/js/productoverview.js"></script>
+                                                                                <!-- <script src="/js/orderdemo.js"></script> -->
+
+                                                                                </body>
+
+                                                                                </html>

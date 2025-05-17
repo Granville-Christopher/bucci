@@ -1,0 +1,110 @@
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eee;
+    color: #333;
+}
+
+/* Hero Section */
+.hero-about {
+    margin-top: 75px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.414), rgba(0, 0, 0, 0.848)), 
+    url('../IMG/men/pexels-pixabay-157675.jpg') center/cover no-repeat;
+    padding: 100px 20px;
+    color: white;
+}
+.hero-about h1, .hero-about p {
+    opacity: 0;
+    transform: translateY(20px);    
+    transition: all 1s ease-in-out;
+}
+
+/* Engagement Cards */
+.engagement-card {
+    position: relative;
+    top: 50px;
+    height: 330px;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+    display: flex; 
+}
+
+.engagement-card:hover {
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+.engagement-card > img {
+    object-fit: cover;
+    height: 240px;
+}
+.engagement-card .row .col-md-3 img {
+    object-fit: cover;
+    height: 330px;
+}
+
+.card-body {
+    text-align: center;
+}
+
+/* Stats Section */
+.stats-section {
+    padding: 80px 20px;
+}
+.stat-box {
+    margin-top: 20px;
+    padding: 20px;
+    position: relative;
+    display: inline-block;
+    background: white;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+.stat-box:hover {
+    transform: scale(1.1);
+}
+
+
+.plus {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-left: 5px;
+}
+
+
+/* Animations */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease-in-out;
+}
+.slide-in {
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: all 1s ease-in-out;
+}
+.zoom-in {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 1s ease-in-out;
+}
+
+@media screen and (max-width:800px) {
+    .engagement-card {
+        top: 50px;
+        overflow: hidden;
+        /* width: 80%; */
+        height: max-content;
+        margin: auto;
+        border-radius: 10px;
+        transition: transform 0.3s ease-in-out;
+    }
+    .engagement-card .row .col-md-3 img {
+        object-fit: cover;
+        height: 200px;
+        image-rendering: crisp-edges;
+        width: 100% ;
+    }
+    
+}

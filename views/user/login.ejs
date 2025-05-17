@@ -1,0 +1,32 @@
+<%- include("partials/header.ejs") %>
+
+    <div class="container">
+        <div class="d-flex justify-content-center">
+
+            <div class="login-container ">
+                <div class="login-box">
+                    <div class="left-side">
+                        <h2>Sign In</h2>
+                        <p>Sign in to Bucci to continue</p>
+                        <form method="post" id="loginUser" action="/login">
+                            <% if (message) { %>
+                                <div class="alert-message alert alert-warning container"><%= message %></div>
+                              <% } %>
+                            <input name="email" type="email" class="form-control" placeholder="Enter email" required>
+                            <input name="password" type="password" class="form-control mt-3" placeholder="Enter password" required>
+                            <p class="forgot-password"><a href="passwordreset">Reset your password now.</a></p>
+                            <button type="submit" class="btn btn-primary">Sign In</button>
+                        </form>
+                    </div>
+                    <div class="right-side">                        
+                        <h2>Welcome to Bucci!</h2>
+                        <p>If you don't have an account, would you like to register right now?</p>
+                        <a href="signup" class="btn btn-primary">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <%- include("partials/footer.ejs") %>
+

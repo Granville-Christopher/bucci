@@ -1,0 +1,803 @@
+<%- include("partials/header.ejs") %>
+    <!-- Main Content -->
+
+    <main class="admin-content">
+        <audio id="notification-sound"
+            src="/notificationsound/Ahh Girl Sound Effect Ringtone Download - MobCup.Com.Co.mp3" preload="auto"
+            hidden></audio>
+
+        <!-- BACKDROP FOR MOBILE -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <div class="admin-main  fixed-top px-2 py-2">
+            <div class="admin-welcome d-flex justify-content-between align-items-center">
+                <h2 class="welcome-admin">Welcome, Admin <%= admin.fullname %>
+                </h2>
+
+                <% if (message) { %>
+                    <div id="session-message" class="alert-message alert alert-info container py-1"
+                        style="width: fit-content;">
+                        <%= message %>
+                    </div>
+
+                    <script>
+
+                        setTimeout(() => {
+                            const messageBox = document.getElementById("session-message");
+                            if (messageBox) {
+                                messageBox.style.transition = "opacity 0.5s";
+                                messageBox.style.opacity = "0";
+
+                                setTimeout(() => {
+                                    messageBox.remove();
+                                }, 500);
+                            }
+                        }, 5000);
+                    </script>
+                    <% } %>
+                        <div class="admin-buttons">
+
+                            <!-- Toggle Button -->
+                            <button class="sidebar-toggle btn btn-primary me-2" onclick="toggleSidebar()">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <form action="/admin/logout" method="POST" style="display:inline;">
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
+
+
+                        </div>
+            </div>
+        </div>
+        <!-- Admin Container -->
+        <div class="admin-container d-flex">
+
+
+            <!-- Sidebar -->
+            <aside class="admin-sidebar" id="adminSidebar">
+                <ul class="sidebar-menu">
+                    <li class="active" onclick="showSection('dashboard', event)">
+                        <i class="fas fa-chart-line"></i> <b>Dashboard</b>
+                    </li>
+
+                    <li class="dropdownn">
+                        <b>
+                            <i class="fas fa-shopping-cart"></i> <span>Orders</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </b>
+                        <ul id="orders-dropdown" class="dropdownn-menu">
+                            <li onclick="showSection('pending-orders', event)">Pending Orders</li>
+                            <li onclick="showSection('completed-orders', event)">Completed Orders</li>
+                            <li onclick="showSection('failed-orders', event)">Failed Orders</li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdownn">
+                        <b>
+                            <i class="fas fa-box"></i> <span>Products</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </b>
+                        <ul id="products-dropdown" class="dropdownn-menu">
+                            <li onclick="showSection('upload-product', event)">Upload Product</li>
+                            <li onclick="showSection('uploaded-products', event)">Uploaded Products</li>
+                        </ul>
+                    </li>
+
+                    <li onclick="showSection('customers', event)">
+                        <i class="fas fa-users"></i> <b>Customers</b>
+                    </li>
+
+                    <li onclick="showSection('chats', event)">
+                        <i class="fas fa-comments"></i> <b>Chats</b>
+                    </li>
+
+                    <li onclick="showSection('admin-profile', event)">
+                        <i class="fas fa-user-cog"></i> <b>Admin Profile</b>
+                    </li>
+
+                    <li class="dropdownn">
+                        <b>
+                            <i class="fas fa-lock"></i> Authentication
+                            <i class="fas fa-chevron-down"></i>
+                        </b>
+                        <ul id="auth-dropdown" class="dropdownn-menu">
+                            <li><a href="admin/resetpassword" class="btn">Reset Password</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+
+
+
+
+        <!-- Sections -->
+
+        <div id="dashboard" class="content-section active">
+            <h3>Dashboard Overview</h3>
+            <!-- Total Income with Month Filter -->
+            <div class="dashboard-card">
+                <h5>Total Income</h5>
+                <label for="month-filter">Select Month:</label>
+                <select id="month-filter" onchange="updateTotalIncome()">
+                    <option value="all">All Months</option>
+                    <option value="jan">January</option>
+                    <option value="feb">February</option>
+                    <option value="mar">March</option>
+                    <option value="apr">April</option>
+                    <option value="may">May</option>
+                    <option value="jun">June</option>
+                    <option value="jul">July</option>
+                    <option value="aug">August</option>
+                    <option value="sep">September</option>
+                    <option value="oct">October</option>
+                    <option value="nov">November</option>
+                    <option value="dec">December</option>
+                </select>
+                <h3>Total: <span id="total-income">₦0</span></h3>
+                <canvas id="income-chart"></canvas>
+            </div>
+
+            <!-- Orders & Sales, Customer Ratings, and Reviews in a Row -->
+            <div class="row g-3 mt-3 innitsection">
+                <!-- Orders & Sales -->
+                <div class="col-md-4">
+                    <div class="dashboard-card dsh">
+                        <h5>Orders & Sales</h5>
+                        <p><strong>Total Orders:</strong> <span id="total-orders">0</span></p>
+                        <p><strong>Total Sales:</strong> <span id="total-sales">₦0</span></p>
+                        <p><strong>Successful Payments:</strong> <span id="successful-payments">0</span></p>
+                        <p><strong>Failed Payments:</strong> <span id="failed-payments">0</span></p>
+                    </div>
+                </div>
+
+
+                <!-- Customer Ratings -->
+                <div class="col-md-4">
+                    <div class="dashboard-card dsh">
+                        <h5>Customer Ratings</h5>
+                        <p>Average Rating: <span id="avg-rating">0.0</span> ⭐</p>
+                    </div>
+                </div>
+
+
+                <!-- Recent Reviews -->
+                <div class="col-md-4">
+                    <div class="dashboard-card dsh">
+                        <h5>Recent Reviews</h5>
+                        <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner" id="reviews-container">
+                                <% if (reviews && reviews.length> 0) { %>
+                                    <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel"
+                                        data-bs-interval="3000">
+                                        <div class="carousel-inner">
+                                            <% reviews.forEach((review, index)=> { %>
+                                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                    <div class="review-card p-4 border rounded shadow-sm text-center">
+                                                        <h5 class="mb-3">
+
+                                                            <%= review.user ? review.user.fullname : 'Unknown user' %>
+                                                        </h5>
+                                                        <p class="mb-2">
+                                                            <strong>Rating:</strong>
+                                                            <%= review.rating %>/5
+                                                        </p>
+                                                        <p class="text-muted">
+                                                            "<%= review.text %>"
+                                                        </p>
+                                                        <!-- 🆕 Only visible for Admin: Show Product Name -->
+                                                        <p class="text-muted small mt-2">
+                                                            <strong>Product:</strong>
+                                                            <%= review.product ? review.product.product_name
+                                                                : 'Unknown Product' %>
+                                                        </p>
+
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+                                    </div>
+
+
+                                    <% } else { %>
+                                        <div class="text-center">
+                                            <p>No reviews uploaded yet.</p>
+                                        </div>
+                                        <% } %>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        </div>
+
+
+        <!-- PENDING ORDERS -->
+        <div id="pending-orders" class="content-section">
+            <h3 class="mb-3">Pending Orders</h3>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">S/N</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Total Products</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!pendingDeliveryOrders || pendingDeliveryOrders.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">No pending delivery orders at the moment.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% pendingDeliveryOrders.forEach(function(order, index) { %>
+                                        <tr>
+                                            <td>
+                                                <%= index + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= order.fullname %>
+                                            </td>
+                                            <td>
+                                                <%= order.paymentReference %>
+                                            </td>
+                                            <td>
+                                                <%= order.items.length %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(order.orderDate).toDateString() %>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-success mark-completed"
+                                                    data-id="<%= order._id %>">Mark as Completed</button>
+                                                <button class="btn btn-info view-order" data-id="<%= order._id %>">View
+                                                    Order</button>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPLETED ORDERS -->
+        <div id="completed-orders" class="content-section">
+            <h3 class="mb-3">Completed Orders</h3>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">S/N</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Total Products</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!deliveredOrders || deliveredOrders.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">No delivered orders at the moment.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% deliveredOrders.forEach(function(order, index) { %>
+                                        <tr>
+                                            <td>
+                                                <%= index + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= order.fullname %>
+                                            </td>
+                                            <td>
+                                                <%= order.paymentReference %>
+                                            </td>
+                                            <td>
+                                                <%= order.items.length %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(order.orderDate).toDateString() %>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-success mark-completed"
+                                                    data-id="<%= order._id %>">Mark as pending</button>
+                                                <button class="btn btn-info view-order" data-id="<%= order._id %>">View
+                                                    Order</button>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAILED ORDERS -->
+        <div id="failed-orders" class="content-section">
+            <h3 class="mb-3">Failed Orders</h3>
+            <!-- <div class="table-container"> -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th scope="col">S/N</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Total Products</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (!failedOrders || failedOrders.length===0) { %>
+                            <tr>
+                                <td colspan="6" class="text-center">No failed orders at the moment.</td>
+                            </tr>
+                            <% } else { %>
+                                <% failedOrders.forEach(function(order, index) { %>
+                                    <tr>
+                                        <td>
+                                            <%= index + 1 %>
+                                        </td>
+                                        <td>
+                                            <%= order.fullname %>
+                                        </td>
+                                        <td>
+                                            <%= order.paymentReference %>
+                                        </td>
+                                        <td>
+                                            <%= order.items.length %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(order.paymentDate).toDateString() %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+
+        <div id="upload-product" class="content-section">
+            <h3 class="mb-3">Upload a New Product</h3>
+            <form id="product-upload-form" enctype="multipart/form-data" action="/admin/upload-product" method="POST">
+                <!-- Product Name -->
+                <div class="mb-3">
+                    <label for="product-name" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="product-name" name="product_name" required>
+                </div>
+
+                <!-- Quantity -->
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                </div>
+
+                <!-- Colors (Multiple Selection) -->
+                <div class="mb-3">
+                    <label for="colors" class="form-label">Available Colors</label>
+                    <select class="form-select" id="colors" name="colors[]" multiple required>
+                        <option value="Black">Black</option>
+                        <option value="White">White</option>
+                        <option value="Red">Red</option>
+                        <option value="Blue">Blue</option>
+                        <option value="Green">Green</option>
+                        <option value="Yellow">Yellow</option>
+                        <option value="Grey">Grey</option>
+                        <option value="Brown">Brown</option>
+                        <option value="Purple">Purple</option>
+                    </select>
+                    <small class="text-muted">Hold Ctrl (Windows) or Command (Mac) to select multiple
+                        colors.</small>
+                </div>
+
+                <!-- Sizes (Multiple Selection) -->
+                <div class="mb-3">
+                    <label for="sizes" class="form-label">Available Sizes</label>
+                    <select class="form-select" id="sizes" name="sizes[]" multiple required>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="2XL">2XL</option>
+                        <option value="3XL">3XL</option>
+                    </select>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price (₦)</label>
+                    <input type="number" class="form-control" id="price" name="price" min="0" step="0.01" required>
+                </div>
+
+
+                <!-- Flash Sale Option -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="flashsale" name="flashsale">
+                    <label class="form-check-label" for="flashsale">Mark as Flash Sale (optional)</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="flashsale_price">Flash Sale Price (Optional)</label>
+                    <input type="number" step="0.01" name="flashsale_price" id="flashsale_price" class="form-control" disabled>
+                  </div>
+                  
+                  <script>
+                    document.getElementById("flashsale").addEventListener("change", function () {
+                      document.getElementById("flashsale_price").disabled = !this.checked;
+                    });
+                  </script>
+                <!-- Brand -->
+                <div class="mb-3">
+                    <label for="brand" class="form-label">Brand</label>
+                    <select class="form-select" id="brand" name="brand" required>
+                        <option value="Bucci">Bucci</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <!-- Product Images (Multiple Upload) -->
+                <div class="mb-3">
+                    <label for="product-images" class="form-label">Product Images (Upload 4 images)</label>
+                    <input type="file" class="form-control" id="product-images" name="product_images[]" multiple
+                        accept="image/*" required>
+                    <small class="text-muted">You must upload exactly 4 images.</small>
+                </div>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category" required>
+                        <!-- <option value="tracksuit">Tracksuit</option> -->
+                        <option value="tshirt">T-Shirts</option>
+                        <option value="shorts">Short</option>
+                        <option value="denim">Denim</option>
+                        <option value="sweatshirt">Sweatshirt</option>
+                        <option value="sweatpant">Sweatpant</option>
+                        <option value="2piece">2-Piece</option>
+                        <option value="joggers">Joggers</option>
+                        <option value="casual-trousers">Casual trouser</option>
+                        <option value="polo">Polo</option>
+                        <option value="jersey">Jersey</option>
+                        <option value="jacket">Jacket</option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn mb-3 upload-product">Upload Product</button>
+            </form>
+        </div>
+
+
+
+        <div id="uploaded-products" class="content-section">
+            <h5 class="mb-3">All Uploaded Products</h5>
+
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">Image</th>
+                                <th scope="col" class="text-center">Product Name</th>
+                                <th scope="col" class="text-center">Product Brand</th>
+                                <th scope="col" class="text-center">Product Quantity</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-list">
+                            <% if (products && products.length> 0) { %>
+                                <% products.forEach(product=> { %>
+                                    <tr>
+                                        <td>
+                                            <img src="<%= product.product_images[0] %>"
+                                                alt="<%= product.product_name %>" class="img-thumbnail"
+                                                style="width: 50px; height: 50px;">
+                                        </td>
+                                        <td class="text-center">
+                                            <%= product.product_name %>
+                                        </td>
+                                        <td class="text-center">
+                                            <%= product.brand %>
+                                        </td>
+                                        <td class="text-center">
+                                            <%= product.quantity %>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/admin/product/<%= product._id %>"
+                                                class="btn btn-sm btn-primary">View</a>
+
+                                            <form action="/admin/delete-product/<%= product._id %>" method="POST"
+                                                style="display: inline;" onsubmit="return confirm('Are you sure?')">
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="3" class="text-center">No products uploaded yet.</td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="customers" class="content-section container ">
+            <h3 class="mb-3">Customers List</h3>
+
+            <!-- Bootstrap Responsive Table Wrapper -->
+
+
+            <div class="table-responsive">
+                <table class="table  table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col">Total Orders</th>
+                            <th scope="col">Completed Orders</th>
+                            <th scope="col">Pending Orders</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (users && users.length> 0) { %>
+                            <% users.forEach(user=> { %>
+                                <tr>
+                                    <td>
+                                        <%= user.fullname %>
+                                    </td>
+                                    <td>
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <%= user.phone %>
+                                    </td>
+                                    <td>
+                                        <%= user.totalOrders %>
+                                    </td>
+                                    <td>
+                                        <%= user.completedOrders %>
+                                    </td>
+                                    <td>
+                                        <%= user.pendingOrders %>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-info btn-sm"><i class="fa fa-eye"></i> View</button>
+                                            <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i>
+                                                Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="7" class="text-center">No users found.</td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+
+                </table>
+            </div>
+
+
+        </div>
+
+
+        <div id="chats" class="content-section">
+            <h3 class="mb-3">Admin Chats</h3>
+
+
+            <div class="row">
+                <div class="chat-sidebar p-3  col-md-4">
+                    <h6 class="mb-3">Messages</h6>
+                    <ul class="list-group" id="chat-list">
+                        <li class="list-group-item">Loading messages...</li>
+                    </ul>
+                </div>
+
+
+                <!-- Main Chat Section -->
+                <div class="chat-main p-3 col-md-8">
+                    <button class="btn btn-outline-secondary btn-sm d-md-none mb-2" onclick="showChatList()">←
+                        Back</button>
+                    <div id="chat-window" class="chat-content">
+                        <p class="text-muted">Select a chat to view messages.</p>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        </div>
+
+        <div id="admin-profile" class="content-section">
+            <h3 class="mb-3">Admin Profile</h3>
+
+            <!-- Admin Info -->
+            <div class="profile-card p-3">
+                <h6>Admin Details</h6>
+                <p><strong>Name:</strong> <span id="admin-name">
+                        <%= admin.fullname %>
+                    </span></p>
+                <p><strong>Email:</strong> <span id="admin-email">
+                        <%= admin.email %>
+                    </span></p>
+
+                <!-- Edit Profile Button -->
+                <button class="btn btn-primary btn-sm mt-2" onclick="toggleEditProfile()">Edit Profile</button>
+
+                <!-- Edit Profile Form (Hidden by Default) -->
+                <div id="edit-profile-form" class="collapse-form mt-3">
+                    <h6>Edit Profile</h6>
+                    <form action="/admin/profile" method="POST">
+                        <div class="mb-2">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="fullname" class="form-control" placeholder="Enter new name"
+                                value="<%= admin.fullname %>" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter new email"
+                                value="<%= admin.email %>" required>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm">Save Changes</button>
+                    </form>
+                </div>
+
+
+                <!-- Update Security Button -->
+                <button class="btn btn-outline-secondary btn-sm mt-3" onclick="toggleUpdateSecurity()">Update
+                    Security</button>
+
+                <!-- Update Security Form (Hidden by Default) -->
+                <div id="update-security-form" class="collapse-form mt-3">
+                    <h6>Change Password</h6>
+                    <form action="/admin/change-password" method="POST">
+                        <div class="mb-2">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" name="currentPassword" class="form-control"
+                                placeholder="Enter current password" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="newPassword" class="form-control"
+                                placeholder="Enter new password" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" name="confirmPassword" class="form-control"
+                                placeholder="Confirm new password" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-sm">Change Password</button>
+                        <p class="mt-2"><a href="adminforgotpassword.html" class="text-muted">Forgotten Password?</a>
+                        </p>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="login" class="content-section">
+            <div class="auth-card p-4">
+                <h3 class="text-center mb-3">Login</h3>
+
+                <!-- Email Input -->
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <!-- Password Input -->
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+
+                <!-- Forgot Password & Sign Up Links -->
+                <div class="d-flex justify-content-between mb-3">
+                    <a href="#resetpassword" class="text-primary">Forgot Password?</a>
+                    <a href="#signup" class="text-primary">Create Account</a>
+                </div>
+
+                <!-- Login Button -->
+                <button class="btn w-100">Login</button>
+            </div>
+        </div>
+
+        <!-- Sign Up Section -->
+        <div id="signup" class="content-section">
+            <div class="auth-card p-4">
+                <h3 class="text-center mb-3">Sign Up</h3>
+
+                <!-- Full Name Input -->
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" placeholder="Enter your full name" required>
+                </div>
+
+                <!-- Email Input -->
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <!-- Password Input -->
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" placeholder="Create a password" required>
+                </div>
+
+                <!-- Confirm Password Input -->
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" placeholder="Confirm your password" required>
+                </div>
+
+                <!-- Login Link -->
+                <div class="mb-3 text-center">
+                    <a href="#login" class="text-primary">Already have an account? Login</a>
+                </div>
+
+                <!-- Sign Up Button -->
+                <button class="btn w-100">Sign Up</button>
+            </div>
+        </div>
+
+
+        <div id="orderModal" class="modal fade" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Order Details</h5>
+                        <button type="button" class="btn-close close-modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Order ID:</strong> <span id="modal-order-id"></span></p>
+                        <p><strong>User:</strong> <span id="modal-user-name"></span></p>
+                        <p><strong>Total Amount:</strong> ₦<span id="modal-total-amount"></span></p>
+                        <p><strong>Order Date:</strong> <span id="modal-order-date"></span></p>
+                        <p><strong>Order Status:</strong> <span id="modal-status"></span></p>
+                        <p><strong>Order Delivery address:</strong> <span id="modal-delivery-address"></span></p>
+                        <h5>Items:</h5>
+                        <ul id="modal-item"></ul>
+                        <h5>Images:</h5>
+                        <div id="modal-images" class="d-flex flex-wrap"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger close-modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    </div>
+
+
+
+    <%- include("partials/footer.ejs") %>
