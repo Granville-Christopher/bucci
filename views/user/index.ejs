@@ -1,6 +1,13 @@
 <%- include("partials/header.ejs") %>
 
     <!-- Hero Section -->
+
+    <div class="slider-container">
+        <div class="slide" style="background-image: url('/IMG/smhero/pexels-ali-ahmed-83499412-27428306.jpg');"></div>
+        <div class="slide" style="background-image: url('/IMG/smhero/pexels-efrem-efre-2786187-26555607.jpg');"></div>
+        <div class="slide" style="background-image: url('/IMG/smhero/pexels-felipepelaquim-10024021.jpg');"></div>
+        <div class="slide" style="background-image: url('/IMG/smhero/pexels-ushindinamegabe-14888314.jpg');"></div>
+    </div>
     <div class="hero ">
         <div class="container">
             <div class="hero-text">
@@ -21,6 +28,23 @@
             </div>
         </div>
     </div>
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showNextSlide() {
+            slides[currentSlide].style.opacity = 0;
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].style.opacity = 1;
+        }
+
+        if (window.innerWidth < 768) {
+            slides[0].style.opacity = 1;
+            setInterval(showNextSlide, 3000);
+        }
+    </script>
+
+
     <!-- category section -->
     <section class="container">
         <div class="row justify-content-center align-items-center g-2 category">
@@ -124,7 +148,7 @@
                                             <span style="text-decoration: line-through; color: gray;">₦<%= product.price
                                                     %></span>
                                             <span style="color: red; font-weight: bold;">₦<%= product.flashsale_price %>
-                                                    </span>
+                                            </span>
                                             <% } else { %>
                                                 ₦<%= product.price %>
                                                     <% } %>
