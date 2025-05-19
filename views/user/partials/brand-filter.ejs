@@ -1,0 +1,37 @@
+<div class="container-fluid">
+    <div class="row justify-content-start products" id="product-container">
+        <% if (shopProducts && shopProducts.length > 0) { %>
+          <% shopProducts.forEach(product => { %>
+            <div class="col-6 col-md-3">
+              <div class="product-item position-relative">
+                <% if (product.flashsale) { %>
+                  <div class="ribbon ribbon-top-left"><span>Flash Sale</span></div>
+                <% } %>
+                <button class="wishlist-btn" onclick="addToWishlist(this)">
+                  <i class="fa fa-heart"></i>
+                </button>
+                <a href="/product/<%= product._id %>">
+                  <img src="<%= product.product_images[0] %>" class="img-fluid" alt="<%= product.product_name %>">
+                </a>
+                <h3><a id="id" style="display: none;"><%= product._id %></a></h3>
+                <h5><a href="/product/<%= product._id %>"><%= product.product_name %></a></h5>
+                <p class="product-price" data-flashsale="<%= product.flashsale %>"
+                  data-flashsale-price="<%= product.flashsale_price %>"
+                  data-price="<%= product.price %>">
+                  <% if (product.flashsale) { %>
+                    <span style="text-decoration: line-through; color: gray;">₦<%= product.price %></span>
+                    <span style="color: red; font-weight: bold;">₦<%= product.flashsale_price %></span>
+                  <% } else { %>
+                    ₦<%= product.price %>
+                  <% } %>
+                </p>
+                <h4 class="view-button"><a href="/product/<%= product._id %>">View This</a></h4>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="text-center">No products to show.</p>
+        <% } %>
+      </div>
+      
+</div>

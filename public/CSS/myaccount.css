@@ -176,9 +176,12 @@ body {
     left: 0;
   }
   .account-container .account-container-2 {
-    margin-top: 150px;
+    margin-top: 130px;
   }
   .main-content h2{
+    font-size: 16px;
+  }
+  .main-content h5{
     font-size: 16px;
   }
   .main-content {
@@ -187,6 +190,10 @@ body {
     margin-top: -70px;
     margin-left: 0px;
     transition: margin-left 0.3s ease-in-out;
+  }
+  #edit-form label{
+    font-size: 14px;
+
   }
   #orders{
     width: 91%;
@@ -216,6 +223,32 @@ body {
     overflow-y: scroll; /* Enables independent scrolling */
     scrollbar-width: thin; /* Make scrollbar thinner */
   }
+  #profile p {
+    font-size: 12px;
+  }
+  #edit-btn, #save-btn, #cancel-btn {
+    font-size: smaller;
+  }
+  #support > p{
+    font-size: small;
+  }
+}
+/* cards support */
+
+.cont-cards .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 1rem;
+}
+.cont-cards .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+.cont-cards a {
+  color: inherit;
+  text-decoration: none;
+}
+.cont-cards a:hover {
+  text-decoration: underline;
 }
 
 /* profile */
@@ -234,7 +267,9 @@ body {
 #profile .btn:hover {
   opacity: 0.8;
 }
-
+#profile .edit-form{
+  display: none;
+}
 #profile .btn.cancel {
   background: #888;
 }
@@ -306,7 +341,10 @@ body {
   display: flex;
   flex-direction: column;
 }
-
+.display-messages{
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
 .message-container.right {
   align-self: flex-end;
   max-width: 70%;

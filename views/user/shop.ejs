@@ -1,7 +1,7 @@
 <%- include("partials/header.ejs") %>
 
   <!-- product overvier -->
-  <section class="product-overview container shop mt-5">
+  <section class="product-overview container shop">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -17,19 +17,24 @@
 
       <div class="category-filters text-start col-md-7 col-12 ">
         <button class="filter-btn active" data-category="all">All Products</button>
-            <button class="filter-btn" data-category="t-shirt">T-shirt</button>
-            <button class="filter-btn" data-category="shorts">Shorts</button>
-            <button class="filter-btn" data-category="denim">Denim jeans</button>
-            <button class="filter-btn" data-category="sweatshirt">Sweatshirts</button>
-            <button class="filter-btn" data-category="sweatpant">Sweatpants</button>
-            <button class="filter-btn" data-category="2piece">2-Piece</button>
-            <button class="filter-btn" data-category="joggers">Joggers</button>
-            <button class="filter-btn" data-category="casual-trousers">Casual rousers</button>
-            <button class="filter-btn" data-category="polo">Polo</button>
-            <button class="filter-btn" data-category="jersey">Jerseys</button>
-            <button class="filter-btn" data-category="jacket">Jackets</button>
-            <button class="filter-btn" style="  background-color: rgba(223, 206, 162, 0.733); border-radius: 5px;"
-                data-category="Bucci-wears">Bucci wears</button>
+        <button class="filter-btn" data-category="tshirt">T-shirt</button>
+        <button class="filter-btn" data-category="shorts">Shorts</button>
+        <button class="filter-btn" data-category="denim">Denim jeans</button>
+        <button class="filter-btn" data-category="sweater">Sweatshirts</button>
+        <button class="filter-btn" data-category="sweatpant">Sweatpants</button>
+        <button class="filter-btn" data-category="2piece">2-Piece</button>
+        <button class="filter-btn" data-category="joggers">Joggers</button>
+        <button class="filter-btn" data-category="casual-trousers">Casual rousers</button>
+        <button class="filter-btn" data-category="polo">Polo</button>
+        <button class="filter-btn" data-category="jersey">Jerseys</button>
+        <button class="filter-btn" data-category="jacket">Jackets</button>
+      </div>
+      <div class="brand-filters text-start col-md-7 col-12 ">
+
+        <button class="brand-filter-btn" style="  background-color: rgba(223, 206, 162, 0.733); border-radius: 5px;"
+          data-category="bucci">Bucci wears</button>
+        <button class="brand-filter-btn" style="  background-color: rgba(223, 206, 162, 0.733); border-radius: 5px;"
+          data-category="others">Others</button>
 
       </div>
 
@@ -74,64 +79,74 @@
       </div>
 
       <!-- Product Display Section -->
-      <div class="row justify-content-start products">
+      <div id="loading-spinner" style="display: none; text-align: center;">
+        <img src="/IMG/shopspin/0_Loading_Progress_3840x2160.mp4"style="width: 50px;">
+        <p>Loading...</p>
+      </div>
+
+      <div class="row justify-content-start products" id="product-container">
         <!-- Example Product Item -->
-        <% if (shopProducts && shopProducts.length> 0) { %>
-          <% shopProducts.forEach(product=> { %>
+        <% if (shopProducts && shopProducts.length > 0) { %>
+          <% shopProducts.forEach(product => { %>
             <div class="col-6 col-md-3">
               <div class="product-item position-relative">
-
-                <!-- Flash Sale Ribbon -->
                 <% if (product.flashsale) { %>
                   <div class="ribbon ribbon-top-left"><span>Flash Sale</span></div>
+                <% } %>
+                <button class="wishlist-btn" onclick="addToWishlist(this)">
+                  <i class="fa fa-heart"></i>
+                </button>
+                <a href="/product/<%= product._id %>">
+                  <img src="<%= product.product_images[0] %>" class="img-fluid" alt="<%= product.product_name %>">
+                </a>
+                <h3><a id="id" style="display: none;"><%= product._id %></a></h3>
+                <h5><a href="/product/<%= product._id %>"><%= product.product_name %></a></h5>
+                <p class="product-price" data-flashsale="<%= product.flashsale %>"
+                  data-flashsale-price="<%= product.flashsale_price %>"
+                  data-price="<%= product.price %>">
+                  <% if (product.flashsale) { %>
+                    <span style="text-decoration: line-through; color: gray;">₦<%= product.price %></span>
+                    <span style="color: red; font-weight: bold;">₦<%= product.flashsale_price %></span>
+                  <% } else { %>
+                    ₦<%= product.price %>
                   <% } %>
-
-                    <!-- Wishlist Button -->
-                    <button class="wishlist-btn" onclick="addToWishlist(this)">
-                      <i class="fa fa-heart"></i>
-                    </button>
-
-                    <!-- Product Image -->
-                    <a href="/product/<%= product._id %>">
-                      <img src="<%= product.product_images[0] %>" class="img-fluid" alt="<%= product.product_name %>">
-                    </a>
-
-                    <!-- Product ID (hidden) -->
-                    <h3><a id="id" style="display: none;">
-                        <%= product._id %>
-                      </a></h3>
-
-                    <!-- Product Name -->
-                    <h5><a href="/product/<%= product._id %>">
-                        <%= product.product_name %>
-                      </a></h5>
-
-                    <!-- Product Price -->
-                    
-                    <p class="product-price" data-flashsale="<%= product.flashsale %>"
-                      data-flashsale-price="<%= product.flashsale_price %>" data-price="<%= product.price %>">
-                      <% if (product.flashsale) { %>
-                        <span style="text-decoration: line-through; color: gray;">₦<%= product.price %></span>
-                        <span style="color: red; font-weight: bold;">₦<%= product.flashsale_price %></span>
-                        <% } else { %>
-                          ₦<%= product.price %>
-                            <% } %>
-                    </p>
-
-                    
-
-                    <!-- View Button -->
-                    <h4 class="view-button"><a href="/product/<%= product._id %>">View This</a></h4>
+                </p>
+                <h4 class="view-button"><a href="/product/<%= product._id %>">View This</a></h4>
               </div>
             </div>
-            <% }) %>
-              <% } else { %>
-                <p class="text-center">No products to show.</p>
-                <% } %>
-
+          <% }) %>
+        <% } else { %>
+          <p class="text-center">No products to show.</p>
+        <% } %>
+        
       </div>
-  </section>
+      <div class="pagination-controls text-center mt-4">
+        <% if (totalPages> 1) { %>
+          <ul class="pagination justify-content-center">
+            <% if (currentPage> 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=8">Previous</a>
+              </li>
+              <% } %>
 
+                <% for (let i=1; i <=totalPages; i++) { %>
+                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&limit=8">
+                      <%= i %>
+                    </a>
+                  </li>
+                  <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=8">Next</a>
+                      </li>
+                      <% } %>
+          </ul>
+          <% } %>
+      </div>
+
+  </section>
 
 
   <%- include("partials/footer.ejs") %>

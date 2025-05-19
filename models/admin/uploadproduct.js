@@ -37,7 +37,6 @@ const productSchema = new mongoose.Schema({
       "denim",
       "sweatshirt",
       "sweatpant",
-      "tracksuit",
       "2piece",
       "joggers",
       "casual-trousers",

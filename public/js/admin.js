@@ -586,3 +586,84 @@ window.onload = function () {
   fetchDashboardStats();
   fetchAverageRating();
 };
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  function setupSearch(sectionId, apiStatus) {
+    const input = document.getElementById(`${sectionId}-search-input`);
+    const btn = document.getElementById(`${sectionId}-search-btn`);
+    const resultDiv = document.getElementById(`${sectionId}-search-result`);
+    const tableContainer = document.getElementById(`${sectionId}-table-container`) || document.getElementById(`${sectionId}-table-responsive`);
+
+    btn.addEventListener('click', async () => {
+      const paymentReference = input.value.trim();
+      if (!paymentReference) {
+        alert('Please enter a payment reference to search.');
+        return;
+      }
+
+      try {
+        resultDiv.innerHTML = 'Searching...';
+        resultDiv.style.display = 'block';
+        tableContainer.style.display = 'none';
+
+        // Update the fetch URL to include the /admin prefix
+        const response = await fetch(`/admin/orders/search?paymentReference=${encodeURIComponent(paymentReference)}&status=${apiStatus}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            resultDiv.innerHTML = '<p>No order found with that payment reference.</p>';
+          } else {
+            resultDiv.innerHTML = '<p>Error searching for order.</p>';
+          }
+          tableContainer.style.display = 'block';
+          return;
+        }
+
+        const data = await response.json();
+        if (!data.order) {
+          resultDiv.innerHTML = '<p>No order found.</p>';
+          tableContainer.style.display = 'block';
+          return;
+        }
+
+        // Render order details
+        const order = data.order;
+        let itemsHtml = '';
+        order.items.forEach(item => {
+          itemsHtml += `
+            <li>
+              ${item.productName || item.name || 'Item'} - Quantity: ${item.quantity} - Price: ${item.price}
+            </li>
+          `;
+        });
+
+        resultDiv.innerHTML = `
+          <h4>Order Details</h4>
+          <p><strong>Name:</strong> ${order.fullname}</p>
+          <p><strong>Payment Reference:</strong> ${order.paymentReference}</p>
+          <p><strong>Order Status:</strong> ${order.status || order.orderStatus}</p>
+          <p><strong>Payment Status:</strong> ${order.paymentStatus || 'N/A'}</p>
+          <p><strong>Order Date:</strong> ${new Date(order.orderDate || order.paymentDate).toDateString()}</p>
+          <p><strong>Items:</strong></p>
+          <ul>${itemsHtml}</ul>
+          <button id="${sectionId}-back-btn" class="btn btn-secondary">Back to list</button>
+        `;
+
+        // Back button handler
+        document.getElementById(`${sectionId}-back-btn`).addEventListener('click', () => {
+          resultDiv.style.display = 'none';
+          tableContainer.style.display = 'block';
+          input.value = '';
+        });
+
+      } catch (err) {
+        resultDiv.innerHTML = '<p>Error fetching order details.</p>';
+        tableContainer.style.display = 'block';
+      }
+    });
+  }
+
+  setupSearch('pending', 'pending');
+  setupSearch('completed', 'completed');
+  setupSearch('failed', 'failed');
+});

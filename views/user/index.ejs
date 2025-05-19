@@ -85,10 +85,10 @@
         <!-- Category Filters -->
         <div class="category-filters text-start">
             <button class="filter-btn active" data-category="all">All Products</button>
-            <button class="filter-btn" data-category="t-shirt">T-shirt</button>
+            <button class="filter-btn" data-category="tshirt">T-shirt</button>
             <button class="filter-btn" data-category="shorts">Shorts</button>
             <button class="filter-btn" data-category="denim">Denim jeans</button>
-            <button class="filter-btn" data-category="sweatshirt">Sweatshirts</button>
+            <button class="filter-btn" data-category="sweater">Sweatshirts</button>
             <button class="filter-btn" data-category="sweatpant">Sweatpants</button>
             <button class="filter-btn" data-category="2piece">2-Piece</button>
             <button class="filter-btn" data-category="joggers">Joggers</button>
@@ -96,8 +96,6 @@
             <button class="filter-btn" data-category="polo">Polo</button>
             <button class="filter-btn" data-category="jersey">Jerseys</button>
             <button class="filter-btn" data-category="jacket">Jackets</button>
-            <button class="filter-btn" style="  background-color: rgba(223, 206, 162, 0.733); border-radius: 5px;"
-                data-category="Bucci-wears">Bucci wears</button>
         </div>
 
         <!-- Product Display Section -->
@@ -160,6 +158,17 @@
         </div>
 
     </section>
+    <script>
+        document.querySelectorAll('.filter-btn').forEach(button => {
+          button.addEventListener('click', async function () {
+            const category = this.getAttribute('data-category');
+            const res = await fetch(`/index-filter-category?brand=Bucci&category=${category}`);
+            const html = await res.text();
+            document.querySelector('.products').innerHTML = html;
+          });
+        });
+      </script>
+      
     <% if (user) { %>
         <script>
             localStorage.setItem`('userEmail', "<%= user.email %>")`;

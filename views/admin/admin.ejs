@@ -220,9 +220,21 @@
 
 
         <!-- PENDING ORDERS -->
+        <!-- PENDING ORDERS -->
         <div id="pending-orders" class="content-section">
             <h3 class="mb-3">Pending Orders</h3>
-            <div class="table-container">
+
+            <!-- Search Bar -->
+            <div class="mb-3">
+                <input type="text" id="pending-search-input" placeholder="Search by Payment Reference"
+                    class="form-control" />
+                <button id="pending-search-btn" class="btn btn-primary mt-2">Search</button>
+            </div>
+
+            <!-- Search Result Container -->
+            <div id="pending-search-result" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="table-container" id="pending-table-container">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
@@ -276,7 +288,16 @@
         <!-- COMPLETED ORDERS -->
         <div id="completed-orders" class="content-section">
             <h3 class="mb-3">Completed Orders</h3>
-            <div class="table-container">
+
+            <div class="mb-3">
+                <input type="text" id="completed-search-input" placeholder="Search by Payment Reference"
+                    class="form-control" />
+                <button id="completed-search-btn" class="btn btn-primary mt-2">Search</button>
+            </div>
+
+            <div id="completed-search-result" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="table-container" id="completed-table-container">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
@@ -330,11 +351,18 @@
         <!-- FAILED ORDERS -->
         <div id="failed-orders" class="content-section">
             <h3 class="mb-3">Failed Orders</h3>
-            <!-- <div class="table-container"> -->
-            <div class="table-responsive">
+
+            <div class="mb-3">
+                <input type="text" id="failed-search-input" placeholder="Search by Payment Reference"
+                    class="form-control" />
+                <button id="failed-search-btn" class="btn btn-primary mt-2">Search</button>
+            </div>
+
+            <div id="failed-search-result" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="table-responsive" id="failed-table-container">
                 <table class="table table-striped table-hover">
                     <thead class="table-dark">
-
                         <tr>
                             <th scope="col">S/N</th>
                             <th scope="col">Name</th>
@@ -373,6 +401,186 @@
                 </table>
             </div>
         </div>
+        <!-- PENDING ORDERS -->
+        <div id="pending-orders" class="content-section">
+            <h3 class="mb-3">Pending Orders</h3>
+
+            <!-- Search Bar -->
+            <div class="mb-3">
+                <input type="text" id="pending-search-input" placeholder="Search by Payment Reference"
+                    class="form-control" />
+                <button id="pending-search-btn" class="btn btn-primary mt-2">Search</button>
+            </div>
+
+            <!-- Search Result Container -->
+            <div id="pending-search-result" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="table-container" id="pending-table-container">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">S/N</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Total Products</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!pendingDeliveryOrders || pendingDeliveryOrders.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">No pending delivery orders at the moment.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% pendingDeliveryOrders.forEach(function(order, index) { %>
+                                        <tr>
+                                            <td>
+                                                <%= index + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= order.fullname %>
+                                            </td>
+                                            <td>
+                                                <%= order.paymentReference %>
+                                            </td>
+                                            <td>
+                                                <%= order.items.length %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(order.orderDate).toDateString() %>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-success mark-completed"
+                                                    data-id="<%= order._id %>">Mark as Completed</button>
+                                                <button class="btn btn-info view-order" data-id="<%= order._id %>">View
+                                                    Order</button>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPLETED ORDERS -->
+        <div id="completed-orders" class="content-section">
+            <h3 class="mb-3">Completed Orders</h3>
+
+            <div class="mb-3">
+                <input type="text" id="completed-search-input" placeholder="Search by Payment Reference"
+                    class="form-control" />
+                <button id="completed-search-btn" class="btn btn-primary mt-2">Search</button>
+            </div>
+
+            <div id="completed-search-result" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="table-container" id="completed-table-container">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">S/N</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Total Products</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!deliveredOrders || deliveredOrders.length===0) { %>
+                                <tr>
+                                    <td colspan="6" class="text-center">No delivered orders at the moment.</td>
+                                </tr>
+                                <% } else { %>
+                                    <% deliveredOrders.forEach(function(order, index) { %>
+                                        <tr>
+                                            <td>
+                                                <%= index + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= order.fullname %>
+                                            </td>
+                                            <td>
+                                                <%= order.paymentReference %>
+                                            </td>
+                                            <td>
+                                                <%= order.items.length %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(order.orderDate).toDateString() %>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-success mark-completed"
+                                                    data-id="<%= order._id %>">Mark as pending</button>
+                                                <button class="btn btn-info view-order" data-id="<%= order._id %>">View
+                                                    Order</button>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAILED ORDERS -->
+        <div id="failed-orders" class="content-section">
+            <h3 class="mb-3">Failed Orders</h3>
+
+            <div class="mb-3">
+                <input type="text" id="failed-search-input" placeholder="Search by Payment Reference"
+                    class="form-control" />
+                <button id="failed-search-btn" class="btn btn-primary mt-2">Search</button>
+            </div>
+
+            <div id="failed-search-result" style="display:none; margin-bottom: 20px;"></div>
+
+            <div class="table-responsive" id="failed-table-container">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">S/N</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Total Products</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (!failedOrders || failedOrders.length===0) { %>
+                            <tr>
+                                <td colspan="6" class="text-center">No failed orders at the moment.</td>
+                            </tr>
+                            <% } else { %>
+                                <% failedOrders.forEach(function(order, index) { %>
+                                    <tr>
+                                        <td>
+                                            <%= index + 1 %>
+                                        </td>
+                                        <td>
+                                            <%= order.fullname %>
+                                        </td>
+                                        <td>
+                                            <%= order.paymentReference %>
+                                        </td>
+                                        <td>
+                                            <%= order.items.length %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(order.paymentDate).toDateString() %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="upload-product" class="content-section">
@@ -436,14 +644,15 @@
 
                 <div class="form-group">
                     <label for="flashsale_price">Flash Sale Price (Optional)</label>
-                    <input type="number" step="0.01" name="flashsale_price" id="flashsale_price" class="form-control" disabled>
-                  </div>
-                  
-                  <script>
+                    <input type="number" step="0.01" name="flashsale_price" id="flashsale_price" class="form-control"
+                        disabled>
+                </div>
+
+                <script>
                     document.getElementById("flashsale").addEventListener("change", function () {
-                      document.getElementById("flashsale_price").disabled = !this.checked;
+                        document.getElementById("flashsale_price").disabled = !this.checked;
                     });
-                  </script>
+                </script>
                 <!-- Brand -->
                 <div class="mb-3">
                     <label for="brand" class="form-label">Brand</label>

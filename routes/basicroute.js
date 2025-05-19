@@ -20,15 +20,53 @@ const Payment = require("../models/user/paymentstatus");
 const Order = require('../models/user/order')
 const Text = require("../models/user/myaccountmessage");
 
+// In-memory cache and helper function
+const productCache = new Map();
+
+function setCacheWithExpiry(key, value, ttl = 300000) {
+  productCache.set(key, value);
+  setTimeout(() => {
+    productCache.delete(key);
+  }, ttl);
+}
+
+
+// SEARCH endpoint
+router.get('/api/search', async (req, res) => {
+  const query = req.query.q?.toLowerCase() || "";
+
+  try {
+    if (!query) {
+      return res.json({ suggestions: [], products: [] });
+    }
+
+    const products = await Product.find({
+      product_name: { $regex: query, $options: 'i' }
+    }).limit(20);
+
+    const suggestions = products
+      .map(p => p.product_name)
+      .filter((name, index, self) => self.indexOf(name) === index)
+      .slice(0, 10);
+
+    res.json({ suggestions, products });
+  } catch (err) {
+    console.error("❌ Error in /api/search:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 // Home route
 router.get("/", async (req, res) => {
   const message = req.session.message;
   req.session.message = null;
   try {
     const featuredProducts = await Product.aggregate([
-      { $match: { /* optionally filter if needed */ } },
+      { $match: { brand: "Bucci" } },
       { $sample: { size: 4 } }
     ]);
+    
     
     res.render("user/index", {
       page: "home",
@@ -48,18 +86,86 @@ router.get("/", async (req, res) => {
     });
   }
 });
+router.get("/index-filter-category", async (req, res) => {
+  try {
+    const brand = req.query.brand || "Bucci";
+    const category = req.query.category;
 
+    let filter = { brand };
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    const filteredProducts = await Product.find(filter);
+
+    res.render("user/partials/brand-filter", {
+      shopProducts: filteredProducts
+    });
+  } catch (err) {
+    console.error("Error filtering category:", err);
+    res.send("An error occurred while filtering.");
+  }
+});
+
+
+router.get("/api/filter-products", async (req, res) => {
+  const category = req.query.category;
+  
+  if (productCache.has(category)) {
+    return res.json(productCache.get(category));
+  }
+  
+  try {
+    let products;
+    
+    if (category === "all") {
+      products = await Product.aggregate([{ $sample: { size: 8 } }]);
+    } else {
+      products = await Product.aggregate([
+        { $match: { category: category } },
+        { $sample: { size: 8 } },
+      ]);
+    }
+    
+    productCache.set(category, products); // Store result in cache
+    res.json(products);
+  } catch (err) {
+    console.error("Error filtering products:", err);
+    res.status(500).json([]);
+  }
+});
+router.get("/filter-brand", async (req, res) => {
+  let { brand } = req.query;
+
+  // Log the received brand value
+  console.log("Received brand query:", brand);
+
+  // Capitalize properly
+  brand = brand.charAt(0).toUpperCase() + brand.slice(1).toLowerCase();
+  console.log("After capitalization:", brand);
+
+  try {
+    const productsByBrand = await Product.find({ brand });
+    console.log("Matching products:", productsByBrand.length); // Debug product count
+
+    res.render("user/partials/brand-filter", { shopProducts: productsByBrand });
+  } catch (err) {
+    console.error("Error fetching brand products:", err);
+    res.render("user/partials/brand-filter", { shopProducts: [] });
+  }
+});
 
 router.get("/product/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    const relatedProducts = await Product.find({
-      category: product.category,
-      _id: { $ne: product._id },
-    }).limit(4);
+    const relatedProducts = await Product.aggregate([
+      { $match: { category: product.category, _id: { $ne: product._id } } },
+      { $sample: { size: 4 } }
+    ]);
+    
     const reviews = await Review.find({ product: product._id }).populate(
       "user"
-    ).sort({createdAt: -1});
+    ).sort({createdAt: 1});
 
     const message = req.session.message || null;
     req.session.message = null;
@@ -104,13 +210,30 @@ router.get("/shop", async (req, res) => {
   const message = req.session.message;
   req.session.message = null;
 
+  const page = parseInt(req.query.page) || 1;
+  const limit = 8; // products per page
+  const skip = (page - 1) * limit;
+
   try {
-    const shopProducts = await Product.find().sort({ createdAt: -1 });
+    // Get total products count
+    const totalProducts = await Product.countDocuments();
+
+    // Instead of aggregate $sample, we'll do pagination with sorting by _id (or any criteria)
+    // If you want random sampling *per page*, it's tricky; usually pagination is fixed order.
+    // Here's a simple paginated fetch:
+    const shopProducts = await Product.find({})
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(totalProducts / limit);
+
     res.render("user/shop", {
       page: "shop",
       loaded: "shop",
       message,
       shopProducts,
+      currentPage: page,
+      totalPages,
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -119,9 +242,12 @@ router.get("/shop", async (req, res) => {
       loaded: "shop",
       message,
       shopProducts: [],
+      currentPage: 1,
+      totalPages: 1,
     });
   }
 });
+
 // get delivery address and send to frontend for checkout
 router.get("/get-delivery-address", async (req, res) => {
   try {
@@ -220,13 +346,6 @@ router.get("/wishlist", (req, res) => {
     loaded: "wishlist",
     message,
   });
-});
-
-// reciept
-router.get("/reciept", (req, res) => {
-  const message = req.session.message;
-  req.session.message = null;
-  res.render("user/reciept", { page: "reciept", loaded: "reciept", message });
 });
 
 // cart

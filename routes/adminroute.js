@@ -31,7 +31,20 @@ const {
 const Users = require("../models/user/signupmodel");
 const Payment = require("../models/user/paymentstatus")
 const Order = require("../models/user/order");
-// const DeliveryAddress = require("../models/user/deliveryaddress");
+
+
+
+
+// Example Express route (adjust your router accordingly)
+router.get('/orders/search', async (req, res) => {
+  const { paymentReference } = req.query;
+  try {
+      const order = await Order.findOne({ paymentReference: paymentReference }).lean();
+      res.json({ order });
+  } catch (error) {
+      res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Dummy admin dashboard
 router.get("/", async (req, res) => {
@@ -71,7 +84,6 @@ router.get("/", async (req, res) => {
       status: "pending_delivery",
     });
     const deliveredOrders = await Order.find({
-      userId: req.session.userId,
       status: "delivered",
     });
     const failedOrders = await Payment.find({status: "failed"});
