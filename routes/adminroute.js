@@ -8,7 +8,7 @@ const Admin = require("../models/admin/register");
 const upload = require("../middlewares/upload");
 const AdminMessage = require("../models/admin/replymessages");
 const Text = require("../models/user/myaccountmessage");
-// const Order = require("../models/user/order")
+const DeliveryAddress = require("../models/user/deliveryaddress")
 // const nodemailer = require("nodemailer");
 
 const {
@@ -26,6 +26,7 @@ const {
   getDashboardStats,
   getMessages,
   getAverageRating,
+  getOrdersByState,
   totalIncome,
 } = require("../controllers/admincont");
 const Users = require("../models/user/signupmodel");
@@ -57,19 +58,20 @@ router.get("/", async (req, res) => {
   req.session.message = null;
   const admin = req.session.admin;
 
-  try {
-    const reviews = await Review.find()
-      .populate("user")
-      .populate("product")
-      .sort({ date: -1 });
+  let usersWithOrders = [];
+  let products = [];
+  let pendingDeliveryOrders = [];
+  let deliveredOrders = [];
+  let failedOrders = [];
 
-    const users = await Users.find().sort({ createdAt: -1 });
-    const usersWithOrders = await Promise.all(
+  try {
+    const users = await Users.find().sort({ createdAt: 1 });
+    usersWithOrders = await Promise.all( // Assign to the already declared variable
       users.map(async (user) => {
         const totalOrders = await Order.countDocuments({ userId: user._id });
         const completedOrders = await Order.countDocuments({ userId: user._id, status: "delivered" });
         const pendingOrders = await Order.countDocuments({ userId: user._id, status: "pending_delivery" });
-    
+
         return {
           ...user.toObject(),
           totalOrders,
@@ -78,34 +80,38 @@ router.get("/", async (req, res) => {
         };
       })
     );
-    const products = await Product.find().sort({ createdAt: -1 });
+    products = await Product.find().sort({ createdAt: 1 }); 
+    pendingDeliveryOrders = await Order.find({ status: "pending_delivery" }); // Assign
+    deliveredOrders = await Order.find({ status: "delivered" }); // Assign
+    failedOrders = await Payment.find({ status: "failed" }); // Assign
 
-    const pendingDeliveryOrders = await Order.find({
-      status: "pending_delivery",
-    });
-    const deliveredOrders = await Order.find({
-      status: "delivered",
-    });
-    const failedOrders = await Payment.find({status: "failed"});
-    await Text.updateMany({}, { $set: { unread: false } }); 
-    // const usermessages = await Text.find().sort({ createdAt: 1 });
-    res.render("admin/admin", { message, admin, users: usersWithOrders, reviews, products, pendingDeliveryOrders, deliveredOrders, failedOrders });
-  } catch (err) {
-    console.error("Error fetching data:", err);
+    await Text.updateMany({}, { $set: { unread: false } });
+
     res.render("admin/admin", {
       message,
       admin,
-      products: [],
       users: usersWithOrders,
-      reviews: [],
-      pendingDeliveryOrders: [],
-      deliveredOrders: [],
-      failedOrders: [],
-      // usermessages: [],
+      products,
+      pendingDeliveryOrders,
+      deliveredOrders,
+      failedOrders
+    });
+  } catch (err) {
+    console.error("Error fetching data:", err);
+   
+    res.render("admin/admin", {
+      message,
+      admin,
+      products: products, 
+      users: usersWithOrders, 
+      pendingDeliveryOrders: pendingDeliveryOrders, 
+      deliveredOrders: deliveredOrders, 
+      failedOrders: failedOrders,
     });
   }
 });
 router.get('/dashboard-stats', getDashboardStats);
+router.get('/dashboard-orders-by-state', getOrdersByState);
 router.get("/get-messages", getMessages);
 router.get('/get-sidebar-messages', async (req, res) => {
   try {

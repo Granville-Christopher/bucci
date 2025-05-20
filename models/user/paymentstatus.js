@@ -1,6 +1,19 @@
 const mongoose = require("mongoose");
 function getCurrentMonthAbbreviation() {
-  const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  const monthNames = [
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "may",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "oct",
+    "nov",
+    "dec",
+  ];
   const currentDate = new Date();
   const monthIndex = currentDate.getMonth(); // 0 for Jan, 1 for Feb, ...
   return monthNames[monthIndex];
@@ -45,7 +58,8 @@ const paymentSchema = new mongoose.Schema({
     required: true,
   },
   shippingAddress: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "DeliveryAddress", // <--- Expects an ObjectId here
     required: true,
   },
   status: {
@@ -57,7 +71,7 @@ const paymentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  month:{
+  month: {
     type: String,
     default: getCurrentMonthAbbreviation(),
   },

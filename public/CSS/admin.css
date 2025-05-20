@@ -4,7 +4,7 @@ body {
   /* height: 100vh; */
   /* overflow-x: hidden; Prevent unwanted horizontal scroll */
 }
-.admin-main{
+.admin-main {
   background-color: #d6d6d6;
   box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
@@ -13,6 +13,141 @@ body {
   width: 100%;
   /* height: 100vh; */
   overflow-x: hidden;
+}
+.dashboard-wrapper {
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start; /* Align items to the start for side-by-side */
+  gap: 20px;
+}
+
+#dashboard-metrics-container {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0; /* Prevent shrinking of the container */
+}
+
+.dashboard-metric {
+  width: 50%;
+  height: 50%;
+  display: flex;
+  position: absolute;
+  font-size: 0.8em;
+}
+
+.dashboard-metric:nth-child(1) {
+  top: 0;
+  left: 0;
+  text-align: right;
+  justify-content: right;
+  padding-right: 10px;
+  align-items: center;
+  padding-top: 40px;
+  background-color: #ccc;
+}
+
+.dashboard-metric:nth-child(2) {
+  top: 0;
+  right: 0;
+  padding-top: 40px;
+  align-items: center;
+  padding-left: 10px;
+  background-color: #a6e3a1;
+}
+
+.dashboard-metric:nth-child(3) {
+  bottom: 0;
+  left: 0;
+  padding-bottom: 40px;
+  padding-left: 50px; 
+  align-items: center;
+  background-color: #28a745;
+}
+
+.dashboard-metric:nth-child(4) {
+  bottom: 0;
+  right: 0;
+  padding-left: 10px;
+  padding-top: 10px;
+
+  background-color: #dc3545;
+}
+
+#dashboard-metrics-legend-sm {
+  display: none; /* Hidden by default */
+}
+
+#dashboard-metrics-legend-sm .row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#dashboard-metrics-legend-sm .col-6 {
+  width: 50%;
+  padding-right: 10px;
+  margin-bottom: 5px;
+}
+
+#dashboard-metrics-legend-sm p {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 0;
+  font-size: 0.8em;
+}
+
+#dashboard-metrics-legend-md {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+#dashboard-metrics-legend-md div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Wrapper to control the square aspect ratio and max size */
+.average-rating-chart-wrapper {
+  position: relative;
+  padding-bottom: 80%;
+  overflow: hidden; /* Hide anything that might go outside if content overfills */
+}
+
+/* Make the canvas fill the square wrapper */
+#averageRatingChart {
+  position: absolute; /* Position the canvas absolutely within its wrapper */
+  top: 0;
+  left: 0;
+  width: 100% !important; /* Make canvas fill the wrapper */
+  height: 60% !important; /* Make canvas fill the wrapper */
+  border-radius: 10%;
+}
+
+.dsh {
+  height: 300px;
+}
+.dsh .avg {
+  margin-top: -130px;
+}
+.dsh > h5 {
+  margin-bottom: 10px;
+  font-size: smaller;
 }
 
 /* Slide-in Sidebar Styles */
@@ -29,11 +164,15 @@ body {
   border-right: 1px solid #ddd;
   transition: all 0.3s ease-in-out;
 }
-.admin-sidebar li{
+.admin-sidebar li {
   padding-top: 10px;
-
 }
-.adminproductdetailspage{
+thead.table-dark th,
+td {
+  white-space: nowrap;
+  font-size: smaller;
+}
+.adminproductdetailspage {
   margin-top: 70px;
   background: #ccc;
   padding: 20px;
@@ -42,7 +181,7 @@ body {
 .admin-sidebar.show {
   left: 0;
 }
-.right{
+.right {
   /* float: right; */
   left: 60;
   position: relative;
@@ -73,7 +212,6 @@ body {
   cursor: pointer;
 }
 
-
 .sidebar-menu li.active {
   font-weight: bold;
   color: #ff7043;
@@ -84,7 +222,7 @@ body {
   list-style: none;
   padding-left: 15px;
 }
-.dropdowwn a span{
+.dropdowwn a span {
   text-decoration: none;
   color: #000000 !important;
 }
@@ -130,9 +268,6 @@ body {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   text-align: center;
-}
-.dsh {
-  height: 300px;
 }
 
 select {
@@ -241,7 +376,6 @@ canvas {
   text-align: left;
 }
 
-
 /* Profile Card */
 .profile-card {
   border: 1px solid #ddd;
@@ -286,12 +420,103 @@ canvas {
 #login button:hover {
   background-color: rgb(223, 206, 162);
 }
-.welcome-admin{
+.welcome-admin {
   font-size: 20px;
+}
+
+.mel {
+  width: 483px;
+  height: 300px;
+  overflow-y: scroll;
+
+}
+#session-message {
+  /* Positioning */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+
+  /* Sizing and spacing */
+  max-width: 350px;
+  padding: 15px 20px;
+  margin: 0;
+  /* Appearance */
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+  border-radius: 0.25rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: block;
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+}
+.chart-container-bar {
+  width: 380px; 
+  padding-bottom: 30px;
+  overflow-x: hidden; 
+  padding-bottom: 10px; 
+}
+
+#ordersByStateChart {
+  width: 100% !important; 
+}
+
+/* Medium and larger screens - show md legend, hide sm */
+@media (min-width: 768px) {
+  #dashboard-metrics-legend-sm {
+    display: none;
+  }
+  #dashboard-metrics-legend-md {
+    display: flex;
+  }
 }
 /* Responsive Sidebar */
 @media screen and (max-width: 768px) {
-  .admin-main{
+  .nt{
+    margin-top: 40px !important;
+  }
+  .mel {
+    width: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    height: max-content;
+  }
+  .chart-container-bar {
+    position: relative; /* Important for Chart.js tooltips/labels */
+    height: 800px;
+    width: 100%;
+    overflow-y: hidden; /* **This enables vertical scrolling** if content exceeds height */
+    overflow-x: hidden; /* Prevent horizontal scroll if not needed */
+    padding-bottom: 10px; /* Add some padding at the bottom for aesthetics if scrolling */
+  }
+  .dashboard-wrapper {
+    flex-direction: column; /* Stack on small screens */
+    align-items: center;
+  }
+  #dashboard-metrics-legend-sm {
+    display: block;
+    width: 100%; /* Take full width when stacked */
+    margin-top: 30px;
+  }
+  #dashboard-metrics-legend-sm .p2 {
+    margin-top: -50px;
+  }
+  #dashboard-metrics-legend-md {
+    display: none;
+  }
+
+  #dashboard-metrics-container {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0; /* Prevent shrinking of the container */
+  }
+
+  .admin-main {
     background-color: #d6d6d6;
     box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
   }
@@ -308,12 +533,11 @@ canvas {
     border-right: 1px solid #ddd;
     transition: all 0.3s ease-in-out;
   }
-  .welcome-admin{
+  .welcome-admin {
     font-size: 16px;
   }
-  .admin-buttons{
+  .admin-buttons {
     display: flex;
-
   }
   .admin-content {
     /* margin-top: 2px; */
@@ -335,6 +559,73 @@ canvas {
   .chat-main {
     width: 100%;
     display: none;
+  }
+  .dashboard-metric > span {
+    font-size: 10px !important;
+  }
+
+  .dashboard-metric:nth-child(1) {
+    top: 0;
+    left: 0;
+    text-align: right;
+    justify-content: right;
+    padding-right: 10px;
+    align-items: center;
+    padding-top: 40px;
+    background-color: #ccc;
+  }
+  
+  .dashboard-metric:nth-child(2) {
+    top: 0;
+    right: 0;
+    padding-top: 40px;
+    align-items: center;
+    padding-left: 10px;
+    background-color: #a6e3a1;
+  }
+  
+  .dashboard-metric:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    padding-bottom: 40px;
+    padding-left: 80px;
+    align-items: center;
+    background-color: #28a745;
+  }
+  
+  .dashboard-metric:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    padding-left: 10px;
+    padding-top: 22px;
+  
+    background-color: #dc3545;
+  }
+  
+
+  .dsh h5 {
+    font-size: smaller;
+  }
+  .dsh {
+    height: max-content;
+  }
+  .dsh .avg {
+    margin-top: -70px;
+  }
+  .average-rating-chart-wrapper {
+    position: relative;
+    padding-bottom: 80%;
+    overflow: hidden; /* Hide anything that might go outside if content overfills */
+  }
+
+  /* Make the canvas fill the square wrapper */
+  #averageRatingChart {
+    position: absolute; /* Position the canvas absolutely within its wrapper */
+    top: 0;
+    left: 0;
+    width: 150% !important; /* Make canvas fill the wrapper */
+    height: 60% !important; /* Make canvas fill the wrapper */
+    border-radius: 10%;
   }
 }
 /* 

@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const Payment = require("../models/user/paymentstatus");
 const Order = require("../models/user/order");
 const Product = require("../models/admin/uploadproduct");
+const mongoose = require("mongoose");
 
 const userRegister = async (req, res) => {
   try {
@@ -356,6 +357,7 @@ function getCurrentMonthAbbreviation() {
   return monthNames[monthIndex];
 }
 
+
 const createPayment = async (req, res) => {
   try {
     // Ensure the user is logged in
@@ -365,11 +367,21 @@ const createPayment = async (req, res) => {
         .json({ error: "Unauthorized. Please log in to create an order." });
     }
 
-    const { items, totalAmount, shippingAddress } = req.body;
+    const { items, totalAmount, shippingAddress: deliveryAddressId } = req.body; 
+
     const user = req.session.user;
 
     if (!user) {
       return res.status(404).json({ error: "User not found." });
+    }
+
+    if (!deliveryAddressId || !mongoose.Types.ObjectId.isValid(deliveryAddressId)) {
+      return res.status(400).json({ error: "Invalid or missing shipping address ID." });
+    }
+
+    const deliveryAddress = await DeliveryAddress.findOne({ _id: deliveryAddressId, userId: req.session.userId });
+    if (!deliveryAddress) {
+        return res.status(404).json({ error: "Selected delivery address not found or does not belong to user." });
     }
 
     // Create a new payment
@@ -379,7 +391,7 @@ const createPayment = async (req, res) => {
       items: items,
       totalAmount: totalAmount,
       month: getCurrentMonthAbbreviation(),
-      shippingAddress: shippingAddress || "No shipping address uploaded.",
+      shippingAddress: deliveryAddressId,
       status: "pending",
     });
 
@@ -391,9 +403,10 @@ const createPayment = async (req, res) => {
     });
   } catch (err) {
     console.error("Error creating payment:", err);
-    res.status(500).json({ error: "Failed to create payment." });
+    res.status(500).json({ error: "Failed to create payment. Please check server logs for details." });
   }
 };
+
 
 // Update Payment Status
 const updatePaymentStatus = async (req, res) => {

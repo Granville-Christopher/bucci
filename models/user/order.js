@@ -48,7 +48,8 @@ const orderSchema = new mongoose.Schema({
     type: String,
   },
   shippingAddress: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "DeliveryAddress",
     required: true,
   },
 });

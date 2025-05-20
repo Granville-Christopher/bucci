@@ -210,6 +210,31 @@ body {
   font-size: 25px;
   /* color: red; */
 }
+
+.brand-filter-btn {
+  background-color: rgba(223, 206, 162, 0.733);
+  border-radius: 5px;
+  padding: 8px 15px; 
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease; 
+  margin-right: 10px; 
+  margin-bottom: 10px; 
+  color: #333; 
+}
+
+.brand-filter-btn:hover {
+    background-color: rgba(223, 206, 162, 1);
+}
+
+
+.brand-filter-btn.current-brand {
+  background-color: #e65c00;
+  color: white;           
+  border-color: #cc5500;   
+  font-weight: bold;       
+  
+}
 .wishlist-btn.activer {
   color: red;
 }
@@ -219,12 +244,10 @@ body {
 
 .product-item {
   margin: 0px;
-  margin-left: -13.5px;
-  margin-right: -13.5px;
+  margin-left: 5px;
+  margin-right: 5px;
   box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.1); /* Soft shadow */
   align-items: center;
-  /* border-top: 1px solid #ccc;
-  border-bottom: 1px solid #ccc; */
   border-right: none;
   border-left: none;
   padding: 10px;

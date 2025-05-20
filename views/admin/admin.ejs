@@ -19,7 +19,6 @@
                         style="width: fit-content;">
                         <%= message %>
                     </div>
-
                     <script>
 
                         setTimeout(() => {
@@ -141,85 +140,82 @@
             </div>
 
             <!-- Orders & Sales, Customer Ratings, and Reviews in a Row -->
-            <div class="row g-3 mt-3 innitsection">
+            <div class="row g-3 mt-3 innitsection row">
                 <!-- Orders & Sales -->
-                <div class="col-md-4">
+                <div class="col-md-4 dsh">
+                    <h5>Orders & Sales</h5>
                     <div class="dashboard-card dsh">
-                        <h5>Orders & Sales</h5>
-                        <p><strong>Total Orders:</strong> <span id="total-orders">0</span></p>
-                        <p><strong>Total Sales:</strong> <span id="total-sales">₦0</span></p>
-                        <p><strong>Successful Payments:</strong> <span id="successful-payments">0</span></p>
-                        <p><strong>Failed Payments:</strong> <span id="failed-payments">0</span></p>
-                    </div>
-                </div>
-
-
-                <!-- Customer Ratings -->
-                <div class="col-md-4">
-                    <div class="dashboard-card dsh">
-                        <h5>Customer Ratings</h5>
-                        <p>Average Rating: <span id="avg-rating">0.0</span> ⭐</p>
-                    </div>
-                </div>
-
-
-                <!-- Recent Reviews -->
-                <div class="col-md-4">
-                    <div class="dashboard-card dsh">
-                        <h5>Recent Reviews</h5>
-                        <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner" id="reviews-container">
-                                <% if (reviews && reviews.length> 0) { %>
-                                    <div id="reviewsCarousel" class="carousel slide" data-bs-ride="carousel"
-                                        data-bs-interval="3000">
-                                        <div class="carousel-inner">
-                                            <% reviews.forEach((review, index)=> { %>
-                                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                                                    <div class="review-card p-4 border rounded shadow-sm text-center">
-                                                        <h5 class="mb-3">
-
-                                                            <%= review.user ? review.user.fullname : 'Unknown user' %>
-                                                        </h5>
-                                                        <p class="mb-2">
-                                                            <strong>Rating:</strong>
-                                                            <%= review.rating %>/5
-                                                        </p>
-                                                        <p class="text-muted">
-                                                            "<%= review.text %>"
-                                                        </p>
-                                                        <!-- 🆕 Only visible for Admin: Show Product Name -->
-                                                        <p class="text-muted small mt-2">
-                                                            <strong>Product:</strong>
-                                                            <%= review.product ? review.product.product_name
-                                                                : 'Unknown Product' %>
-                                                        </p>
-
-                                                    </div>
-                                                </div>
-                                                <% }); %>
-                                        </div>
+                        <div class="dashboard-wrapper">
+                            <div id="dashboard-metrics-container">
+                                <div class="dashboard-metric" data-label="Total Orders">
+                                    <span id="total-orders">0</span>
+                                </div>
+                                <div class="dashboard-metric" data-label="Total Sales">
+                                    <span id="total-sales">₦0</span>
+                                </div>
+                                <div class="dashboard-metric" data-label="Successful Payments">
+                                    <span id="successful-payments">0</span>
+                                </div>
+                                <div class="dashboard-metric" data-label="Failed Payments">
+                                    <span id="failed-payments">0</span>
+                                </div>
+                            </div>
+                            <div id="dashboard-metrics-legend-sm">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p><span class="legend-color" style="background-color: #ccc;"></span> Total
+                                            Orders</p>
+                                        <p class="p2"><span class="legend-color"
+                                                style="background-color: #a6e3a1;"></span> Total
+                                            Sales</p>
                                     </div>
-
-
-                                    <% } else { %>
-                                        <div class="text-center">
-                                            <p>No reviews uploaded yet.</p>
-                                        </div>
-                                        <% } %>
+                                    <div class="col-6">
+                                        <p><span class="legend-color" style="background-color: #28a745;"></span>
+                                            Successful Payments</p>
+                                        <p class="p2"><span class="legend-color"
+                                                style="background-color: #dc3545;"></span> Failed
+                                            Payments</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dashboard-metrics-legend-md">
+                                <div><span class="legend-color" style="background-color: #ccc;"></span> Total Orders
+                                </div>
+                                <div><span class="legend-color" style="background-color: #a6e3a1;"></span> Total Sales
+                                </div>
+                                <div><span class="legend-color" style="background-color: #28a745;"></span> Successful
+                                    Payments</div>
+                                <div><span class="legend-color" style="background-color: #dc3545;"></span> Failed
+                                    Payments</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="col-md-4 nt dsh">
+                    <h5>Customer Ratings</h5>
+                    <div class="dashboard-card dsh">
+                        <div class="average-rating-chart-wrapper">
+                            <canvas id="averageRatingChart"></canvas>
+                        </div>
+                        <p class="avg">Average Rating: <span id="avg-rating">0.0</span> ⭐</p>
+                    </div>
+                </div>
 
-
+                <!-- Recent Reviews -->
+                <div class="col-md-4 nt dsh">
+                    <h5>Orders by State</h5>
+                    <div class="dashboard-card dsh mel">
+                        <div class="chart-container-bar"> <canvas id="ordersByStateChart"></canvas>
+                        </div>
+                        <div id="no-orders-msg" style="display: none; text-align: center; padding: 20px;">
+                            <p>No order data available yet.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        </div>
-        </div>
 
-
-        <!-- PENDING ORDERS -->
         <!-- PENDING ORDERS -->
         <div id="pending-orders" class="content-section">
             <h3 class="mb-3">Pending Orders</h3>
@@ -1007,6 +1003,13 @@
     </main>
     </div>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
 
     <%- include("partials/footer.ejs") %>

@@ -10,6 +10,20 @@ const Text = require("../models/user/myaccountmessage");
 const mongoose = require("mongoose");
 const Review = require("../models/user/review");
 const AdminMessage = require("../models/admin/replymessages");
+const { nigerianStates } = require('../config/constants'); // Correct path from controllers/
+const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
+
+// Define your optimized image directory
+const OPTIMIZED_IMAGES_DIR = path.join(__dirname, '../public/uploadedimages/optimized');
+
+// Ensure the directory exists (it's good practice to run this once on app start)
+if (!fs.existsSync(OPTIMIZED_IMAGES_DIR)) {
+    fs.mkdirSync(OPTIMIZED_IMAGES_DIR, { recursive: true });
+}
+
+
 
 const adminRegister = async (req, res) => {
   try {
@@ -83,7 +97,17 @@ const adminLogin = async (req, res) => {
   }
 };
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+  return array;
+}
+
 const uploadProduct = async (req, res) => {
+  const optimizedImagePaths = [];
+
   try {
     const {
       product_name,
@@ -97,18 +121,47 @@ const uploadProduct = async (req, res) => {
       flashsale_price,
     } = req.body;
 
-    // Validate number of uploaded images
     if (!req.files || req.files.length !== 4) {
       req.session.message = "You must upload exactly 4 images.";
-      return res.redirect("/admin"); // Adjust path as needed
+      return res.redirect("/admin");
     }
 
-    // Map the image filenames
-    const product_images = req.files.map(
-      (file) => `/uploadedimages/${file.filename}`
-    );
+    for (const file of req.files) {
+      const originalFileBuffer = file.buffer;
+      const baseName = path.basename(file.originalname, path.extname(file.originalname));
+      const outputFileName = `${baseName}_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+      const outputPath = path.join(OPTIMIZED_IMAGES_DIR, outputFileName);
 
-    // Create and save new product
+      try {
+        await sharp(originalFileBuffer)
+          .resize(6900, 4800, {
+            fit: sharp.fit.inside,
+            withoutEnlargement: true
+          })
+          .webp({ quality: 70 })
+          .toFile(outputPath);
+
+        optimizedImagePaths.push(`/uploadedimages/optimized/${outputFileName}`);
+
+      } catch (sharpError) {
+        console.error(`Error processing image ${file.originalname}:`, sharpError);
+        req.session.message = `Failed to process image: ${file.originalname}. Please try again.`;
+
+        for (const p of optimizedImagePaths) {
+          const fullPathToDelete = path.join(__dirname, '../public', p);
+          if (fs.existsSync(fullPathToDelete)) {
+            fs.unlinkSync(fullPathToDelete);
+            console.log(`Cleaned up partially processed image: ${fullPathToDelete}`);
+          }
+        }
+        return res.redirect("/admin");
+      }
+    }
+
+    // --- NEW STEP: Shuffle the optimized image paths before saving ---
+    const shuffledImagePaths = shuffleArray([...optimizedImagePaths]); // Create a copy before shuffling
+    // --- End NEW STEP ---
+
     const newProduct = new Product({
       product_name,
       quantity,
@@ -117,22 +170,30 @@ const uploadProduct = async (req, res) => {
       price,
       brand,
       category,
-      product_images,
+      product_images: shuffledImagePaths, // Assign the SHUFFLED paths
       flashsale: flashsale === "on" ? true : false,
       flashsale_price: flashsale === "on" && flashsale_price ? flashsale_price : null,
     });
 
     await newProduct.save();
 
-    req.session.message = "Product uploaded successfully!";
+    req.session.message = "Product uploaded and optimized successfully!";
     res.redirect("/admin");
+
   } catch (err) {
-    console.error("Upload Error:", err);
-    req.session.message = "An error occurred while uploading the product.";
+    console.error("Upload Error (general):", err);
+    req.session.message = "An error occurred while uploading the product. No product or images saved.";
+
+    for (const p of optimizedImagePaths) {
+        const fullPathToDelete = path.join(__dirname, '../public', p);
+        if (fs.existsSync(fullPathToDelete)) {
+            fs.unlinkSync(fullPathToDelete);
+            console.log(`Cleaned up image after general upload error: ${fullPathToDelete}`);
+        }
+    }
     res.redirect("/admin");
   }
 };
-
 
 const deleteProduct = async (req, res) => {
   try {
@@ -569,6 +630,147 @@ const totalIncome = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+const getOrdersByState = async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate({
+        path: 'shippingAddress',
+        select: 'state'
+      })
+      .select('shippingAddress');
+
+    // --- IMPORTANT LOG 1 ---
+    console.log("Orders found and populated:", orders.map(order => ({
+      _id: order._id,
+      shippingAddressId: order.shippingAddress ? order.shippingAddress._id : 'N/A',
+      shippingAddressState: order.shippingAddress ? order.shippingAddress.state : 'N/A'
+    })));
+
+
+    const stateCounts = {};
+    nigerianStates.forEach(state => {
+      stateCounts[state] = 0;
+    });
+
+    orders.forEach(order => {
+      if (order.shippingAddress && order.shippingAddress.state) {
+        const state = order.shippingAddress.state;
+        // --- IMPORTANT LOG 2 ---
+        console.log(`Processing order <span class="math-inline">\{order\.\_id\}\: State detected as '</span>{state}'`);
+
+        if (stateCounts.hasOwnProperty(state)) {
+          stateCounts[state]++;
+        } else {
+          // --- IMPORTANT LOG 3 (Pay close attention if this appears!) ---
+          console.warn(`State '${state}' from order ${order._id} is not found in nigerianStates array.`);
+        }
+      } else {
+        // --- IMPORTANT LOG 4 ---
+        console.log(`Order ${order._id} has no valid shipping address or state. ShippingAddress details:`, order.shippingAddress);
+      }
+    });
+
+    // --- IMPORTANT LOG 5 ---
+    console.log("Final stateCounts before sorting:", stateCounts);
+
+    const sortedStates = Object.keys(stateCounts)
+      .map(state => ({ state: state, orders: stateCounts[state] }))
+      .sort((a, b) => b.orders - a.orders);
+
+    const labels = sortedStates.map(item => item.state);
+    const data = sortedStates.map(item => item.orders);
+
+    // --- IMPORTANT LOG 6 ---
+    console.log("Labels for chart (sent to frontend):", labels);
+    console.log("Data for chart (sent to frontend):", data);
+
+    res.json({ labels, data });
+
+  } catch (error) {
+    console.error('Error fetching orders by state:', error);
+    res.status(500).json({ message: 'Error fetching orders by state data', error: error.message });
+  }
+};
+// const getOrdersByState = async (req, res) => {
+//   try {
+//     // Log the user ID for context (if applicable, though this is an admin route)
+//     // console.log("Fetching orders by state...");
+
+//     // Find all orders and populate the shippingAddress to get the state
+//     const orders = await Order.find({})
+//       .populate({
+//         path: 'shippingAddress', // Populate the shippingAddress field
+//         select: 'state'          // Only select the 'state' field from DeliveryAddress
+//       })
+//       .select('shippingAddress'); // We only need the shippingAddress field from the order
+
+//     // --- DEBUGGING STEP 1: Check what orders look like after population ---
+//     console.log("Orders found and populated:", orders.map(order => ({
+//       _id: order._id,
+//       shippingAddressId: order.shippingAddress ? order.shippingAddress._id : 'N/A',
+//       shippingAddressState: order.shippingAddress ? order.shippingAddress.state : 'N/A'
+//     })));
+//     // If you see 'N/A' for shippingAddressState, then either the address isn't populated,
+//     // or the state field is missing in the DeliveryAddress documents.
+
+//     // Initialize state counts for all Nigerian states
+//     const stateCounts = {};
+//     nigerianStates.forEach(state => {
+//       stateCounts[state] = 0;
+//     });
+
+//     // --- DEBUGGING STEP 2: Check initial stateCounts (should be all zeros) ---
+//     console.log("Initial stateCounts:", stateCounts);
+
+
+//     // Aggregate orders by state
+//     orders.forEach(order => {
+//       // Check if shippingAddress is populated and has a state
+//       if (order.shippingAddress && order.shippingAddress.state) {
+//         const state = order.shippingAddress.state;
+//         // --- DEBUGGING STEP 3: Log each state being processed ---
+//         console.log(`Processing order ${order._id}: State detected as '${state}'`);
+
+//         if (stateCounts.hasOwnProperty(state)) {
+//           stateCounts[state]++;
+//         } else {
+//           // --- DEBUGGING STEP 4: Log if a state is found that's NOT in nigerianStates ---
+//           console.warn(`State '${state}' from order ${order._id} is not found in nigerianStates array.`);
+//           // If you see this, it means your 'nigerianStates' array has a different name
+//           // or casing than what's stored in your database.
+//         }
+//       } else {
+//         // --- DEBUGGING STEP 5: Log orders with missing/unpopulated shippingAddress/state ---
+//         console.log(`Order ${order._id} has no valid shipping address or state. ShippingAddress:`, order.shippingAddress);
+//       }
+//     });
+
+//     // --- DEBUGGING STEP 6: Check final stateCounts before sorting ---
+//     console.log("Final stateCounts before sorting:", stateCounts);
+
+
+//     // Convert the stateCounts object into an array of {state: '...', orders: N}
+//     // and sort by orders count in descending order
+//     const sortedStates = Object.keys(stateCounts)
+//       .map(state => ({ state: state, orders: stateCounts[state] }))
+//       .sort((a, b) => b.orders - a.orders); // Sort from highest orders to lowest
+
+//     // Prepare data for Chart.js
+//     const labels = sortedStates.map(item => item.state);
+//     const data = sortedStates.map(item => item.orders);
+
+//     // --- DEBUGGING STEP 7: Check final labels and data being sent ---
+//     console.log("Labels for chart:", labels);
+//     console.log("Data for chart:", data);
+
+
+//     res.json({ labels, data });
+
+//   } catch (error) {
+//     console.error('Error fetching orders by state:', error);
+//     res.status(500).json({ message: 'Error fetching orders by state data', error: error.message });
+//   }
+// };
 
 module.exports = {
   adminRegister,
@@ -586,4 +788,5 @@ module.exports = {
   getDashboardStats,
   getAverageRating,
   totalIncome,
+  getOrdersByState,
 };

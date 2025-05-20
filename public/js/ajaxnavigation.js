@@ -6,10 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
   updateWishlistCounterUI();
   markCartButton();
 
-  // window.addEventListener("storage", function () {
-  //   updateCartCounterUI();
-  //   updateWishlistCounterUI();
-  // });
 
   let searchBtn = document.getElementById("search-btn");
   if (searchBtn) {
@@ -23,11 +19,21 @@ document.addEventListener("DOMContentLoaded", function () {
 function updateRecentlyViewed(product) {
   let viewedItems = JSON.parse(localStorage.getItem("recentlyViewed")) || [];
 
-  // Add new product to start
+  // Check if the product is already in the viewed items
+  const index = viewedItems.findIndex(item => item.id === product.id); // Assuming your product object has a unique 'id'
+
+  if (index !== -1) {
+    // If it exists, remove the old entry
+    viewedItems.splice(index, 1);
+  }
+
+  // Add the current product to the start (either the new one or the moved existing one)
   viewedItems.unshift(product);
 
-  // Keep max 5
-  if (viewedItems.length > 6) viewedItems = viewedItems.slice(0, 6);
+  // Keep a maximum of 6 items
+  if (viewedItems.length > 6) {
+    viewedItems = viewedItems.slice(0, 6);
+  }
 
   localStorage.setItem("recentlyViewed", JSON.stringify(viewedItems));
 }
@@ -39,6 +45,7 @@ if (productLinks) {
     link.addEventListener("click", function () {
       const productItem = this.closest(".product-item");
       const product = {
+        id: productItem.querySelector("h3 a").textContent.trim(),
         image: productItem.querySelector("img").src,
         name: productItem.querySelector("h5")?.textContent.trim() || "",
         price: productItem.querySelector("p")?.textContent.trim() || "",

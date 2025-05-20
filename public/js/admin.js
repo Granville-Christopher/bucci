@@ -25,7 +25,6 @@ function toggleSidebar() {
   backdrop.classList.toggle("show");
 }
 
-
 document.getElementById("sidebarBackdrop")?.addEventListener("click", () => {
   document.getElementById("adminSidebar").classList.remove("show");
   document.getElementById("sidebarBackdrop").classList.remove("show");
@@ -71,7 +70,7 @@ function fetchTotalIncomeData() {
       return response.json();
     })
     .then((data) => {
-      console.log("Fetched income data:", data); 
+      console.log("Fetched income data:", data);
       if (!data || typeof data !== "object") {
         console.error("Invalid income data:", data);
         return;
@@ -566,8 +565,55 @@ function fetchDashboardStats() {
     });
 }
 
+// function fetchAverageRating() {
+//   fetch("/admin/average-rating")
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
+//       return response.json();
+//     })
+//     .then((data) => {
+//       document.getElementById("avg-rating").textContent = data.averageRating;
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching average rating:", error);
+//     });
+// }
+
+// Global variable to hold the chart instance
+let averageRatingChartInstance = null;
+
 function fetchAverageRating() {
   fetch("/admin/average-rating")
+    .then((response) => {
+      if (!response.ok) {
+        // If the server responded with an error status (e.g., 404, 500)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // Check if data.averageRating exists and is a number, otherwise default to 0
+      const averageRating =
+        typeof data.averageRating === "number"
+          ? data.averageRating
+          : parseFloat(data.averageRating) || 0; // Tries to parse string or defaults to 0
+
+      document.getElementById("avg-rating").textContent =
+        averageRating.toFixed(1);
+      createAverageRatingChart(averageRating);
+    })
+    .catch((error) => {
+      console.error("Error fetching average rating:", error);
+      document.getElementById("avg-rating").textContent = "N/A"; // Display N/A on error
+      createAverageRatingChart(0); // Show an empty chart (fully gray) on error
+    });
+}
+
+// Function to fetch and render orders by state chart
+function fetchOrdersByState() {
+  fetch("/admin/dashboard-orders-by-state") // New API endpoint
     .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -575,64 +621,229 @@ function fetchAverageRating() {
       return response.json();
     })
     .then((data) => {
-      document.getElementById("avg-rating").textContent = data.averageRating;
+      const ordersChartContainer =
+        document.getElementById("ordersByStateChart");
+      const noOrdersMsg = document.getElementById("no-orders-msg");
+
+      if (
+        data.data &&
+        data.data.length > 0 &&
+        data.data.some((count) => count > 0)
+      ) {
+        // If there's data, hide the message and show the chart
+        noOrdersMsg.style.display = "none";
+        ordersChartContainer.style.display = "block";
+        createOrdersByStateChart(data.labels, data.data);
+      } else {
+        // If no data, show the message and hide the chart
+        ordersChartContainer.style.display = "none";
+        noOrdersMsg.style.display = "block";
+      }
     })
     .catch((error) => {
-      console.error("Error fetching average rating:", error);
+      console.error("Error fetching orders by state data:", error);
+      document.getElementById("ordersByStateChart").style.display = "none";
+      document.getElementById("no-orders-msg").style.display = "block";
+      document.getElementById("no-orders-msg").innerHTML =
+        "<p>Error loading order data.</p>";
     });
 }
+
+// Global variable to hold the chart instance for orders by state
+let ordersByStateChartInstance = null;
+
+function createOrdersByStateChart(labels, data) {
+  const ctx = document.getElementById("ordersByStateChart").getContext("2d");
+
+  // Destroy existing chart instance if it exists
+  if (ordersByStateChartInstance) {
+    ordersByStateChartInstance.destroy();
+  }
+
+  // --- Dynamic Height Calculation ---
+  const heightPerBar = 30;
+  const calculatedMinHeight = labels.length * heightPerBar;
+  ctx.canvas.style.height = `${calculatedMinHeight}px`;
+  // --- End Dynamic Height Calculation ---
+
+  ordersByStateChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Number of Orders",
+          data: data,
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: "y",
+      scales: {
+        x: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: "Number of Orders",
+          },
+          ticks: {
+            precision: 0,
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "State",
+          },
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+              if (label) {
+                label += ": ";
+              }
+              label += context.parsed.x;
+              return label;
+            },
+          },
+        },
+        // --- MODIFICATION HERE: Disable datalabels ---
+        datalabels: {
+          display: false, // Set this to false to hide the labels on the bars
+        },
+        // --- END MODIFICATION ---
+      },
+    },
+    plugins: [ChartDataLabels], // Keep this if you use ChartDataLabels for other charts,
+                                // but for this specific chart, 'display: false' in options
+                                // will override its rendering.
+  });
+}
+// Call fetchOrdersByState when the DOM is loaded
+document.addEventListener("DOMContentLoaded", fetchOrdersByState);
+
+function createAverageRatingChart(averageRating) {
+  const ctx = document.getElementById("averageRatingChart").getContext("2d");
+
+  // Destroy existing chart instance if it exists
+  if (averageRatingChartInstance) {
+    averageRatingChartInstance.destroy();
+  }
+
+  const maxRating = 5;
+  const filledPortion = averageRating;
+  const remainingPortion = maxRating - averageRating;
+
+  averageRatingChartInstance = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: ["Rated", "Remaining"], // Labels are for internal Chart.js use
+      datasets: [
+        {
+          data: [filledPortion, remainingPortion],
+          backgroundColor: ["#FFD700", "#ccc"], // Yellow for filled, gray for background
+          borderWidth: 0, // No borders between segments
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // Allow custom size
+      plugins: {
+        tooltip: {
+          enabled: false, // Disable tooltips
+        },
+        legend: {
+          display: false, // Hide the legend
+        },
+        datalabels: {
+          display: false, // Hide data labels on the chart itself
+        },
+      },
+      cutout: "80%", // Makes it a donut chart for better visual
+    },
+    plugins: [ChartDataLabels], // Ensure this plugin is registered if you're using it elsewhere
+  });
+}
+
+// Call fetchAverageRating when the DOM is loaded
+document.addEventListener("DOMContentLoaded", fetchAverageRating);
 
 window.onload = function () {
   fetchDashboardStats();
   fetchAverageRating();
 };
 
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   function setupSearch(sectionId, apiStatus) {
     const input = document.getElementById(`${sectionId}-search-input`);
     const btn = document.getElementById(`${sectionId}-search-btn`);
     const resultDiv = document.getElementById(`${sectionId}-search-result`);
-    const tableContainer = document.getElementById(`${sectionId}-table-container`) || document.getElementById(`${sectionId}-table-responsive`);
+    const tableContainer =
+      document.getElementById(`${sectionId}-table-container`) ||
+      document.getElementById(`${sectionId}-table-responsive`);
 
-    btn.addEventListener('click', async () => {
+    btn.addEventListener("click", async () => {
       const paymentReference = input.value.trim();
       if (!paymentReference) {
-        alert('Please enter a payment reference to search.');
+        alert("Please enter a payment reference to search.");
         return;
       }
 
       try {
-        resultDiv.innerHTML = 'Searching...';
-        resultDiv.style.display = 'block';
-        tableContainer.style.display = 'none';
+        resultDiv.innerHTML = "Searching...";
+        resultDiv.style.display = "block";
+        tableContainer.style.display = "none";
 
         // Update the fetch URL to include the /admin prefix
-        const response = await fetch(`/admin/orders/search?paymentReference=${encodeURIComponent(paymentReference)}&status=${apiStatus}`);
+        const response = await fetch(
+          `/admin/orders/search?paymentReference=${encodeURIComponent(
+            paymentReference
+          )}&status=${apiStatus}`
+        );
         if (!response.ok) {
           if (response.status === 404) {
-            resultDiv.innerHTML = '<p>No order found with that payment reference.</p>';
+            resultDiv.innerHTML =
+              "<p>No order found with that payment reference.</p>";
           } else {
-            resultDiv.innerHTML = '<p>Error searching for order.</p>';
+            resultDiv.innerHTML = "<p>Error searching for order.</p>";
           }
-          tableContainer.style.display = 'block';
+          tableContainer.style.display = "block";
           return;
         }
 
         const data = await response.json();
         if (!data.order) {
-          resultDiv.innerHTML = '<p>No order found.</p>';
-          tableContainer.style.display = 'block';
+          resultDiv.innerHTML = "<p>No order found.</p>";
+          tableContainer.style.display = "block";
           return;
         }
 
         // Render order details
         const order = data.order;
-        let itemsHtml = '';
-        order.items.forEach(item => {
+        let itemsHtml = "";
+        order.items.forEach((item) => {
           itemsHtml += `
             <li>
-              ${item.productName || item.name || 'Item'} - Quantity: ${item.quantity} - Price: ${item.price}
+              ${item.productName || item.name || "Item"} - Quantity: ${
+            item.quantity
+          } - Price: ${item.price}
             </li>
           `;
         });
@@ -641,29 +852,83 @@ document.addEventListener('DOMContentLoaded', () => {
           <h4>Order Details</h4>
           <p><strong>Name:</strong> ${order.fullname}</p>
           <p><strong>Payment Reference:</strong> ${order.paymentReference}</p>
-          <p><strong>Order Status:</strong> ${order.status || order.orderStatus}</p>
-          <p><strong>Payment Status:</strong> ${order.paymentStatus || 'N/A'}</p>
-          <p><strong>Order Date:</strong> ${new Date(order.orderDate || order.paymentDate).toDateString()}</p>
+          <p><strong>Order Status:</strong> ${
+            order.status || order.orderStatus
+          }</p>
+          <p><strong>Payment Status:</strong> ${
+            order.paymentStatus || "N/A"
+          }</p>
+          <p><strong>Order Date:</strong> ${new Date(
+            order.orderDate || order.paymentDate
+          ).toDateString()}</p>
           <p><strong>Items:</strong></p>
           <ul>${itemsHtml}</ul>
           <button id="${sectionId}-back-btn" class="btn btn-secondary">Back to list</button>
         `;
 
         // Back button handler
-        document.getElementById(`${sectionId}-back-btn`).addEventListener('click', () => {
-          resultDiv.style.display = 'none';
-          tableContainer.style.display = 'block';
-          input.value = '';
-        });
-
+        document
+          .getElementById(`${sectionId}-back-btn`)
+          .addEventListener("click", () => {
+            resultDiv.style.display = "none";
+            tableContainer.style.display = "block";
+            input.value = "";
+          });
       } catch (err) {
-        resultDiv.innerHTML = '<p>Error fetching order details.</p>';
-        tableContainer.style.display = 'block';
+        resultDiv.innerHTML = "<p>Error fetching order details.</p>";
+        tableContainer.style.display = "block";
       }
     });
   }
 
-  setupSearch('pending', 'pending');
-  setupSearch('completed', 'completed');
-  setupSearch('failed', 'failed');
+  setupSearch("pending", "pending");
+  setupSearch("completed", "completed");
+  setupSearch("failed", "failed");
 });
+
+//  document.addEventListener('DOMContentLoaded', function () {
+//     const ctx = document.getElementById('ordersChart').getContext('2d');
+
+//     const totalOrders = 150; // Example value
+//     const totalSales = 50000; // Example value (₦)
+//     const successfulPayments = 120;
+//     const failedPayments = 30;
+
+//     const chart = new Chart(ctx, {
+//       type: 'doughnut',
+//       data: {
+//         labels: ['Successful Payments', 'Failed Payments', 'Total Sales', 'Total Orders'],
+//         datasets: [{
+//           data: [successfulPayments, failedPayments, totalSales, totalOrders],
+//           backgroundColor: ['#28a745', '#dc3545', '#a6e3a1', '#ccc'],
+//           borderWidth: 2,
+//         }]
+//       },
+//       options: {
+//         cutout: '60%',
+//         plugins: {
+//           legend: {
+//             position: 'bottom',
+//             labels: {
+//               color: '#333',
+//               font: {
+//                 size: 14
+//               }
+//             }
+//           },
+//           tooltip: {
+//             callbacks: {
+//               label: function (tooltipItem) {
+//                 const label = tooltipItem.label;
+//                 const value = tooltipItem.raw;
+//                 if (label === 'Total Sales') {
+//                   return `${label}: ₦${value.toLocaleString()}`;
+//                 }
+//                 return `${label}: ${value}`;
+//               }
+//             }
+//           }
+//         }
+//       }
+//     });
+//   });

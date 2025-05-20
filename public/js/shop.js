@@ -19,3 +19,33 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const brandFiltersContainer = document.querySelector('.brand-filters');
+
+    if (brandFiltersContainer) {
+        brandFiltersContainer.addEventListener('click', (event) => {
+            
+            const clickedButton = event.target.closest('.brand-filter-btn');
+
+            if (clickedButton) {
+              
+                const allFilterButtons = brandFiltersContainer.querySelectorAll('.brand-filter-btn');
+                allFilterButtons.forEach(button => {
+                    button.classList.remove('current-brand');
+                });
+
+                clickedButton.classList.add('current-brand');
+
+                const selectedCategory = clickedButton.dataset.category;
+                console.log('Selected Category:', selectedCategory);
+             
+            }
+        });
+
+        const initialActiveButton = brandFiltersContainer.querySelector('[data-category="bucci"]');
+        if (initialActiveButton) {
+            initialActiveButton.classList.add('current-brand');
+        }
+    }
+});
