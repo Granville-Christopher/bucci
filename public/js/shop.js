@@ -42,10 +42,5 @@ document.addEventListener('DOMContentLoaded', () => {
              
             }
         });
-
-        const initialActiveButton = brandFiltersContainer.querySelector('[data-category="bucci"]');
-        if (initialActiveButton) {
-            initialActiveButton.classList.add('current-brand');
-        }
     }
 });
