@@ -158,31 +158,50 @@ router.get("/filter-brand", async (req, res) => {
 router.get("/product/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
+
+    // If product not found, handle it (e.g., redirect to 404 or home)
+    if (!product) {
+      req.session.message = "Product not found.";
+      return res.redirect("/shop");
+    }
+
+    const reviews = await Review.find({ product: product._id })
+      .populate("user") 
+      .sort({ createdAt: 1 }); 
+
+   
+    let totalRating = 0;
+    if (reviews.length > 0) {
+      reviews.forEach((review) => {
+        totalRating += review.rating; 
+      });
+    }
+
+    const averageRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : "0.0";
+
     const relatedProducts = await Product.aggregate([
       { $match: { category: product.category, _id: { $ne: product._id } } },
-      { $sample: { size: 4 } }
+      { $sample: { size: 4 } },
     ]);
-    
-    const reviews = await Review.find({ product: product._id }).populate(
-      "user"
-    ).sort({createdAt: 1});
 
     const message = req.session.message || null;
-    req.session.message = null;
+    req.session.message = null; 
 
     res.render("user/pdetails", {
       product,
-      page: "home",
+      page: "home", 
       loaded: "home",
       message,
       reviews,
-      user: req.session.user, 
+      user: req.session.user,
       relatedProducts,
+      averageRating,
     });
-    delete req.session.message;
+   
   } catch (err) {
     console.error("Error fetching product:", err);
-    res.redirect("/");
+    req.session.message = "Could not load product details."; // Set a message for the redirect
+    res.redirect("/"); // Redirect to home or an error page
   }
 });
 
@@ -218,9 +237,6 @@ router.get("/shop", async (req, res) => {
     // Get total products count
     const totalProducts = await Product.countDocuments();
 
-    // Instead of aggregate $sample, we'll do pagination with sorting by _id (or any criteria)
-    // If you want random sampling *per page*, it's tricky; usually pagination is fixed order.
-    // Here's a simple paginated fetch:
     const shopProducts = await Product.find({})
       .skip(skip)
       .limit(limit);

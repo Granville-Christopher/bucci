@@ -15,9 +15,10 @@ body {
   overflow-x: hidden;
 }
 .dashboard-wrapper {
+  position: relative;
   justify-content: center;
   align-items: center;
-  margin-top: 50px;
+  margin-top: 20%;
   display: flex;
   flex-direction: row;
   align-items: flex-start; /* Align items to the start for side-by-side */
@@ -104,6 +105,7 @@ body {
 
 #dashboard-metrics-legend-md {
   display: flex;
+  margin-top: 20px;
   flex-direction: column;
   gap: 8px;
   font-size: 0.9em;
@@ -114,7 +116,9 @@ body {
   align-items: center;
   gap: 8px;
 }
-
+.avg{
+  position: relative; text-align: center; margin-top: -200px !important; font-size: smaller;
+}
 .legend-color {
   display: inline-block;
   width: 12px;
@@ -125,6 +129,7 @@ body {
 /* Wrapper to control the square aspect ratio and max size */
 .average-rating-chart-wrapper {
   position: relative;
+  margin-top: 10%;
   padding-bottom: 80%;
   overflow: hidden; /* Hide anything that might go outside if content overfills */
 }
@@ -140,7 +145,16 @@ body {
 }
 
 .dsh {
-  height: 300px;
+  height:350px;
+  justify-content: center;
+}
+.dashboard-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  text-align: center;
 }
 .dsh .avg {
   margin-top: -130px;
@@ -261,14 +275,7 @@ td {
   padding: 25px;
 }
 
-.dashboard-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  text-align: center;
-}
+
 
 select {
   padding: 5px;
@@ -426,7 +433,7 @@ canvas {
 
 .mel {
   width: 483px;
-  height: 300px;
+  height: 350px;
   overflow-y: scroll;
 
 }
@@ -474,8 +481,20 @@ canvas {
 }
 /* Responsive Sidebar */
 @media screen and (max-width: 768px) {
+  .allrate{
+    padding-top:20% !important;
+    padding-bottom:-35% !important;
+  }
+  .avg {
+    margin-top: -240px !important;
+    font-size: 10px;
+    /* padding-bottom: 20px !important; */
+  }
   .nt{
     margin-top: 40px !important;
+  }
+  .rate-card{
+    margin-bottom: 200px !important;
   }
   .mel {
     width: 100%;

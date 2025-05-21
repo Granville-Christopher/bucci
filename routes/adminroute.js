@@ -47,7 +47,81 @@ router.get('/orders/search', async (req, res) => {
   }
 });
 
-// Dummy admin dashboard
+router.get('/viewcustomer/:id', async (req, res) => {
+  try {
+      const userId = req.params.id;
+
+      const customer = await Users.findById(userId);
+
+      if (!customer) {
+          req.session.message = 'Customer not found.';
+          return res.redirect('/admin'); 
+      }
+
+     
+      const customerOrders = await Order.find({ user: customer._id })
+                                         .sort({ createdAt: -1 }); // Latest orders first
+
+   
+      let totalPayments = 0;
+      let successfulPayments = 0;
+      let failedPayments = 0;
+      let totalOrders = customerOrders.length;
+      let deliveredOrders = 0;
+      let pendingOrders = 0;
+      let cancelledOrders = 0;
+
+      customerOrders.forEach(order => {
+          totalPayments += order.totalAmount || 0; 
+
+          if (order.paymentStatus === 'paid' || order.paymentStatus === 'completed') {
+              successfulPayments += order.totalAmount || 0;
+          } else if (order.paymentStatus === 'failed') {
+              failedPayments += order.totalAmount || 0;
+          }
+
+
+          if (order.status === 'delivered') {
+              deliveredOrders++;
+          } else if (order.status === 'pending delivery' || order.status === 'pending_delivery') {
+              pendingOrders++;
+          }
+         
+      });
+
+
+      totalPayments = totalPayments.toFixed(2);
+      successfulPayments = successfulPayments.toFixed(2);
+      failedPayments = failedPayments.toFixed(2);
+
+   
+      res.render('admin/viewcustomer', {
+          customer,
+          totalPayments,
+          successfulPayments,
+          failedPayments,
+          totalOrders,
+          deliveredOrders,
+          pendingOrders,
+          cancelledOrders, 
+          customerOrders,
+          message: req.session.message || null,
+          user: req.session.user,
+          page: 'admin-dashboard', 
+          loaded: 'admin-customers'
+      });
+
+      req.session.message = null;
+
+  } catch (err) {
+      console.error("Error fetching customer details:", err);
+      req.session.message = "An error occurred while fetching customer details.";
+      res.redirect('/admin');
+  }
+});
+
+
+// admin dashboard
 router.get("/", async (req, res) => {
   if (!req.session.adminId) {
     req.session.message = "Please log in to access your account.";
