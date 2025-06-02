@@ -864,7 +864,7 @@ const resetPasswordUser = async (req, res) => {
     service: "gmail",
     auth: {
       user: "christophergranville2@gmail.com",
-      pass: "kjopewaeanpgfuxv", // App password
+      pass: "kjopewaeanpgfuxv",
     },
   });
 

@@ -1,28 +1,30 @@
 const sideLinks2 = document.getElementById("sidebar-menu");
 const sideToggle = document.getElementById("sidebar-toggle");
 
-if(sideToggle){
+if (sideToggle) {
   // Toggle sidebar when clicking the toggle button
   sideToggle.addEventListener("click", function (event) {
     sideLinks2.classList.toggle("active");
-    event.stopPropagation(); 
+    event.stopPropagation();
   });
 
   // Close sidebar when clicking outside of it
   document.addEventListener("click", function (event) {
-    if (!sideLinks2.contains(event.target) && !sideToggle.contains(event.target)) {
-        sideLinks2.classList.remove("active");
+    if (
+      !sideLinks2.contains(event.target) &&
+      !sideToggle.contains(event.target)
+    ) {
+      sideLinks2.classList.remove("active");
     }
   });
 }
 
 // Close sidebar when clicking any menu item
-document.querySelectorAll(".sidebar-menu li").forEach(item => {
-    item.addEventListener("click", function () {
-        sideLinks2.classList.remove("active");
-    });
+document.querySelectorAll(".sidebar-menu li").forEach((item) => {
+  item.addEventListener("click", function () {
+    sideLinks2.classList.remove("active");
+  });
 });
-
 
 // Show selected section
 function showSection(sectionId, event) {
@@ -56,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const emailInput = document.getElementById("email-input");
   const phoneInput = document.getElementById("phone-input");
 
-  if(editBtn){
+  if (editBtn) {
     // Toggle Edit Form
     editBtn.addEventListener("click", function () {
       editForm.style.display =
@@ -64,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if(saveBtn){
+  if (saveBtn) {
     // Save Changes
     saveBtn.addEventListener("click", function () {
       emailText.innerText = emailInput.value;
@@ -73,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if(cancelBtn){
+  if (cancelBtn) {
     // Cancel Editing
     cancelBtn.addEventListener("click", function () {
       editForm.style.display = "none"; // Hide form
@@ -87,18 +89,22 @@ function toggleEditForm(formId) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const recentlyViewedContainer = document.getElementById("recently-viewed-items");
+  const recentlyViewedContainer = document.getElementById(
+    "recently-viewed-items"
+  );
 
-  if(recentlyViewedContainer){
+  if (recentlyViewedContainer) {
     function displayRecentlyViewed() {
-      let viewedItems = JSON.parse(localStorage.getItem("recentlyViewed")) || [];
+      let viewedItems =
+        JSON.parse(localStorage.getItem("recentlyViewed")) || [];
       recentlyViewedContainer.innerHTML = "";
-  
+
       if (viewedItems.length === 0) {
-        recentlyViewedContainer.innerHTML = "<p class='text-muted'>No recently viewed items.</p>";
+        recentlyViewedContainer.innerHTML =
+          "<p class='text-muted'>No recently viewed items.</p>";
         return;
       }
-  
+
       viewedItems.forEach((item) => {
         const itemHTML = `
           <div class="col-6 col-md-3"> 
@@ -117,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
         recentlyViewedContainer.innerHTML += itemHTML;
       });
     }
-  
+
     // Display on page load
     displayRecentlyViewed();
   }
@@ -128,44 +134,76 @@ setInterval(fetchUserMessages, 1000);
 
 async function fetchUserMessages() {
   try {
-    const res = await fetch("/user-send-messages",{
-      method:"GET",
+    const res = await fetch("/user-send-messages", {
+      method: "GET",
       credentials: "include",
     });
+
     const data = await res.json();
     const chatMessages = document.querySelector(".chat-messages");
 
-    if(chatMessages){
-      chatMessages.innerHTML = data.messages.map(msg => {
-        const isAdmin = msg.toUserId !== undefined;
-        return `
-          <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
-            <div class="p-2 rounded ${isAdmin ? "bg-primary text-white" : "bg-light"}" style="max-width: 75%; float: ${isAdmin ? "left" : "right"};">
-              ${msg.text}
+    if (chatMessages) {
+      const isAtBottom =
+        chatMessages.scrollHeight - chatMessages.scrollTop <=
+        chatMessages.clientHeight + 50;
+
+      chatMessages.innerHTML = data.messages
+        .map((msg) => {
+          const isAdmin = msg.toUserId !== undefined;
+          return `
+            <div class="message ${
+              isAdmin ? "admin-message" : "user-message"
+            } mb-2">
+              <div class="p-2 rounded ${
+                isAdmin ? "bg-primary text-white" : "bg-light"
+              }"
+                style="max-width: 75%; float: ${isAdmin ? "left" : "right"};">
+                ${msg.text}
+              </div>
+              <div style="clear: both;"></div>
             </div>
-            <div style="clear: both;"></div>
-          </div>
-        `;
-      }).join("");
-  
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+          `;
+        })
+        .join("");
+
+      if (isAtBottom) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      const jumpBtn = document.getElementById("jump-to-latest-user");
+      if (jumpBtn) {
+        if (!isAtBottom) {
+          jumpBtn.classList.remove("d-none");
+        } else {
+          jumpBtn.classList.add("d-none");
+        }
+      }
     }
   } catch (err) {
     console.error("Error fetching messages:", err);
   }
 }
+
+function scrollToLatestUser() {
+  const chatMessages = document.querySelector(".chat-messages");
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  const jumpBtn = document.getElementById("jump-to-latest-user");
+  if (jumpBtn) jumpBtn.classList.add("d-none");
+}
+
 let myaccountmessage = document.getElementById("myaccountmessage");
-if(myaccountmessage){
+if (myaccountmessage) {
   myaccountmessage.addEventListener("submit", function (event) {
-    event.preventDefault(); 
+    event.preventDefault();
     submitUserMessage(event);
   });
 }
 async function submitUserMessage(event) {
-  event.preventDefault(); 
+  event.preventDefault();
   const message = document.getElementById("userMessageInput").value.trim();
   const user = document.getElementById("userId").value;
-  if(!user){
+  if (!user) {
     showAlertMessage("please log in");
     return;
   }
@@ -176,33 +214,27 @@ async function submitUserMessage(event) {
 
   try {
     const res = await fetch("/submit-message", {
-      
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ text: message })
+      body: JSON.stringify({ text: message }),
     });
 
-   
     if (res.ok) {
-      document.getElementById("userMessageInput").value = ""; 
+      document.getElementById("userMessageInput").value = "";
       showAlertMessage("Message sent successfully ✅", "success");
-      event.preventDefault(); 
-  
+      event.preventDefault();
     } else {
-      const errorMessage = await res.text(); 
+      const errorMessage = await res.text();
       showAlertMessage(errorMessage || "Failed to send message", "danger");
     }
-    
   } catch (err) {
     console.error("Error sending message:", err);
     showAlertMessage("Server error occurred", "danger");
   }
 }
-
-
 
 function showAlertMessage(message, type = "info") {
   const alertBox = document.querySelector(".alert-message-container");
@@ -215,12 +247,9 @@ function showAlertMessage(message, type = "info") {
 
   // Clear the alert after 4 seconds
   setTimeout(() => {
-    alertBox.innerHTML = ""; 
+    alertBox.innerHTML = "";
   }, 4000);
 }
-
-
-
 
 function showAlertMessage(message, type = "info") {
   const alertBox = document.querySelector(".alert-message-container");
@@ -235,6 +264,3 @@ function showAlertMessage(message, type = "info") {
     alertBox.innerHTML = "";
   }, 4000); // Clears the message after 4 seconds
 }
-
-
-

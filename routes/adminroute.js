@@ -8,7 +8,7 @@ const Admin = require("../models/admin/register");
 const upload = require("../middlewares/upload");
 const AdminMessage = require("../models/admin/replymessages");
 const Text = require("../models/user/myaccountmessage");
-const DeliveryAddress = require("../models/user/deliveryaddress")
+const DeliveryAddress = require("../models/user/deliveryaddress");
 // const nodemailer = require("nodemailer");
 
 const {
@@ -30,98 +30,97 @@ const {
   totalIncome,
 } = require("../controllers/admincont");
 const Users = require("../models/user/signupmodel");
-const Payment = require("../models/user/paymentstatus")
+const Payment = require("../models/user/paymentstatus");
 const Order = require("../models/user/order");
 
-
-
-
 // Example Express route (adjust your router accordingly)
-router.get('/orders/search', async (req, res) => {
+router.get("/orders/search", async (req, res) => {
   const { paymentReference } = req.query;
   try {
-      const order = await Order.findOne({ paymentReference: paymentReference }).lean();
-      res.json({ order });
+    const order = await Order.findOne({
+      paymentReference: paymentReference,
+    }).lean();
+    res.json({ order });
   } catch (error) {
-      res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-router.get('/viewcustomer/:id', async (req, res) => {
+router.get("/viewcustomer/:id", async (req, res) => {
   try {
-      const userId = req.params.id;
+    const userId = req.params.id;
 
-      const customer = await Users.findById(userId);
+    const customer = await Users.findById(userId);
 
-      if (!customer) {
-          req.session.message = 'Customer not found.';
-          return res.redirect('/admin'); 
+    if (!customer) {
+      req.session.message = "Customer not found.";
+      return res.redirect("/admin");
+    }
+
+    const customerOrders = await Order.find({ user: customer._id }).sort({
+      createdAt: -1,
+    }); // Latest orders first
+
+    let totalPayments = 0;
+    let successfulPayments = 0;
+    let failedPayments = 0;
+    let totalOrders = customerOrders.length;
+    let deliveredOrders = 0;
+    let pendingOrders = 0;
+    let cancelledOrders = 0;
+
+    customerOrders.forEach((order) => {
+      totalPayments += order.totalAmount || 0;
+
+      if (
+        order.paymentStatus === "paid" ||
+        order.paymentStatus === "completed"
+      ) {
+        successfulPayments += order.totalAmount || 0;
+      } else if (order.paymentStatus === "failed") {
+        failedPayments += order.totalAmount || 0;
       }
 
-     
-      const customerOrders = await Order.find({ user: customer._id })
-                                         .sort({ createdAt: -1 }); // Latest orders first
+      if (order.status === "delivered") {
+        deliveredOrders++;
+      } else if (
+        order.status === "pending delivery" ||
+        order.status === "pending_delivery"
+      ) {
+        pendingOrders++;
+      }
+    });
 
-   
-      let totalPayments = 0;
-      let successfulPayments = 0;
-      let failedPayments = 0;
-      let totalOrders = customerOrders.length;
-      let deliveredOrders = 0;
-      let pendingOrders = 0;
-      let cancelledOrders = 0;
+    totalPayments = totalPayments.toFixed(2);
+    successfulPayments = successfulPayments.toFixed(2);
+    failedPayments = failedPayments.toFixed(2);
 
-      customerOrders.forEach(order => {
-          totalPayments += order.totalAmount || 0; 
+    res.render("admin/viewcustomer", {
+      customer,
+      totalPayments,
+      successfulPayments,
+      failedPayments,
+      totalOrders,
+      deliveredOrders,
+      pendingOrders,
+      cancelledOrders,
+      customerOrders,
+      message: req.session.message || null,
+      user: req.session.user,
+      page: "admin-dashboard",
+      loaded: "admin-customers",
+    });
 
-          if (order.paymentStatus === 'paid' || order.paymentStatus === 'completed') {
-              successfulPayments += order.totalAmount || 0;
-          } else if (order.paymentStatus === 'failed') {
-              failedPayments += order.totalAmount || 0;
-          }
-
-
-          if (order.status === 'delivered') {
-              deliveredOrders++;
-          } else if (order.status === 'pending delivery' || order.status === 'pending_delivery') {
-              pendingOrders++;
-          }
-         
-      });
-
-
-      totalPayments = totalPayments.toFixed(2);
-      successfulPayments = successfulPayments.toFixed(2);
-      failedPayments = failedPayments.toFixed(2);
-
-   
-      res.render('admin/viewcustomer', {
-          customer,
-          totalPayments,
-          successfulPayments,
-          failedPayments,
-          totalOrders,
-          deliveredOrders,
-          pendingOrders,
-          cancelledOrders, 
-          customerOrders,
-          message: req.session.message || null,
-          user: req.session.user,
-          page: 'admin-dashboard', 
-          loaded: 'admin-customers'
-      });
-
-      req.session.message = null;
-
+    req.session.message = null;
   } catch (err) {
-      console.error("Error fetching customer details:", err);
-      req.session.message = "An error occurred while fetching customer details.";
-      res.redirect('/admin');
+    console.error("Error fetching customer details:", err);
+    req.session.message = "An error occurred while fetching customer details.";
+    res.redirect("/admin");
   }
 });
 
-
 // admin dashboard
+// Admin dashboard route
 router.get("/", async (req, res) => {
   if (!req.session.adminId) {
     req.session.message = "Please log in to access your account.";
@@ -133,31 +132,42 @@ router.get("/", async (req, res) => {
   const admin = req.session.admin;
 
   let usersWithOrders = [];
-  let products = [];
+  let initialProducts = [];
   let pendingDeliveryOrders = [];
   let deliveredOrders = [];
   let failedOrders = [];
+  let totalProductCount = 0; // Initialize
 
   try {
     const users = await Users.find().sort({ createdAt: 1 });
-    usersWithOrders = await Promise.all( // Assign to the already declared variable
+    usersWithOrders = await Promise.all(
       users.map(async (user) => {
         const totalOrders = await Order.countDocuments({ userId: user._id });
-        const completedOrders = await Order.countDocuments({ userId: user._id, status: "delivered" });
-        const pendingOrders = await Order.countDocuments({ userId: user._id, status: "pending_delivery" });
+        const completedOrders = await Order.countDocuments({
+          userId: user._id,
+          status: "delivered",
+        });
+        const pendingOrders = await Order.countDocuments({
+          userId: user._id,
+          status: "pending_delivery",
+        });
 
         return {
           ...user.toObject(),
           totalOrders,
           completedOrders,
-          pendingOrders
+          pendingOrders,
         };
       })
     );
-    products = await Product.find().sort({ createdAt: 1 }); 
-    pendingDeliveryOrders = await Order.find({ status: "pending_delivery" }); // Assign
-    deliveredOrders = await Order.find({ status: "delivered" }); // Assign
-    failedOrders = await Payment.find({ status: "failed" }); // Assign
+
+    // Fetch only the first 10 products for the initial page load
+    initialProducts = await Product.find().sort({ createdAt: 1 }).limit(10);
+    // totalProductCount = await Product.countDocuments();
+
+    pendingDeliveryOrders = await Order.find({ status: "pending_delivery" });
+    deliveredOrders = await Order.find({ status: "delivered" });
+    failedOrders = await Payment.find({ status: "failed" });
 
     await Text.updateMany({}, { $set: { unread: false } });
 
@@ -165,33 +175,97 @@ router.get("/", async (req, res) => {
       message,
       admin,
       users: usersWithOrders,
-      products,
+      products: initialProducts,
+      totalProductCount: totalProductCount, // <<< PASS THIS TO EJS
       pendingDeliveryOrders,
       deliveredOrders,
-      failedOrders
+      failedOrders,
     });
   } catch (err) {
     console.error("Error fetching data:", err);
-   
+    // Ensure totalProductCount is passed even in error
     res.render("admin/admin", {
       message,
       admin,
-      products: products, 
-      users: usersWithOrders, 
-      pendingDeliveryOrders: pendingDeliveryOrders, 
-      deliveredOrders: deliveredOrders, 
+      products: initialProducts,
+      totalProductCount: totalProductCount, // <<< PASS IN ERROR CASE TOO
+      users: usersWithOrders,
+      pendingDeliveryOrders: pendingDeliveryOrders,
+      deliveredOrders: deliveredOrders,
       failedOrders: failedOrders,
     });
   }
 });
-router.get('/dashboard-stats', getDashboardStats);
-router.get('/dashboard-orders-by-state', getOrdersByState);
+
+// The /admin/products route remains the same (as it's already paginated)
+router.get("/products", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  try {
+    const products = await Product.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const total = await Product.countDocuments();
+    const hasMore = skip + products.length < total;
+
+    res.json({ products, hasMore });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+router.get("/customers", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 3;
+  const skip = (page - 1) * limit;
+
+  try {
+    const users = await Users.find()
+      .sort({ createdAt: 1 })
+      .skip(skip)
+      .limit(limit);
+    usersWithOrders = await Promise.all(
+      users.map(async (user) => {
+        const totalOrders = await Order.countDocuments({ userId: user._id });
+        const completedOrders = await Order.countDocuments({
+          userId: user._id,
+          status: "delivered",
+        });
+        const pendingOrders = await Order.countDocuments({
+          userId: user._id,
+          status: "pending_delivery",
+        });
+
+        return {
+          ...user.toObject(),
+          totalOrders,
+          completedOrders,
+          pendingOrders,
+        };
+      })
+    );
+    const total = await Users.countDocuments();
+    const hasMore = skip + users.length < total;
+
+    res.json({ users: usersWithOrders, hasMore });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/dashboard-stats", getDashboardStats);
+router.get("/dashboard-orders-by-state", getOrdersByState);
 router.get("/get-messages", getMessages);
-router.get('/get-sidebar-messages', async (req, res) => {
+router.get("/get-sidebar-messages", async (req, res) => {
   try {
     const usermessages = await Text.aggregate([
       {
-        $sort: { createdAt: -1 } // Sort by latest messages first
+        $sort: { createdAt: -1 }, // Sort by latest messages first
       },
       {
         $group: {
@@ -201,33 +275,36 @@ router.get('/get-sidebar-messages', async (req, res) => {
           fullname: { $first: "$fullname" },
           unread: { $first: "$unread" },
           createdAt: { $first: "$createdAt" },
-          allMessages: { $push: "$$ROOT" }
-        }
+          allMessages: { $push: "$$ROOT" },
+        },
       },
       {
-        $sort: { createdAt: -1 } // Sort users by latest message
-      }
+        $sort: { createdAt: -1 }, // Sort users by latest message
+      },
     ]);
 
     res.json(usermessages);
   } catch (err) {
     console.error("Failed to get messages:", err);
-    res.status(500).json({ error: 'Failed to fetch messages' });
+    res.status(500).json({ error: "Failed to fetch messages" });
   }
 });
-router.post('/mark-messages-read', async (req, res) => {
+router.post("/mark-messages-read", async (req, res) => {
   try {
     const { userId } = req.body;
-    await Text.updateMany({ userId, unread: true }, { $set: { unread: false } });
+    await Text.updateMany(
+      { userId, unread: true },
+      { $set: { unread: false } }
+    );
     res.status(200).json({ success: true });
   } catch (error) {
     console.error("Failed to mark messages as read:", error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
 // view product
-router.get('/product/:id', async (req, res) => {
+router.get("/product/:id", async (req, res) => {
   try {
     // 1. Auth check
     if (!req.session.adminId) {
@@ -245,22 +322,21 @@ router.get('/product/:id', async (req, res) => {
     const admin = req.session.admin;
 
     if (!product) {
-      return res.status(404).render('admin/404', { message, admin });
+      return res.status(404).render("admin/404", { message, admin });
     }
 
     // 4. Render the product details page
-    res.render('admin/productDetails', { product, admin, message });
-
+    res.render("admin/productDetails", { product, admin, message });
   } catch (err) {
     console.error("Error fetching product:", err);
     const admin = req.session.Admin || { fullname: "Admin" }; // fallback to avoid crash
     const message = "Server error.";
-    res.status(500).render('admin/500', { message, admin });
+    res.status(500).render("admin/500", { message, admin });
   }
 });
 
 // delete product
-router.post('/delete-product/:id', async (req, res) => {
+router.post("/delete-product/:id", async (req, res) => {
   try {
     if (!req.session.adminId) {
       req.session.message = "Please log in to perform this action.";
@@ -272,11 +348,11 @@ router.post('/delete-product/:id', async (req, res) => {
     await Product.findByIdAndDelete(productId);
 
     req.session.message = "Product deleted successfully.";
-    res.redirect('/admin');
+    res.redirect("/admin");
   } catch (err) {
     console.error("Failed to delete product:", err);
     req.session.message = "Failed to delete the product.";
-    res.redirect('/admin');
+    res.redirect("/admin");
   }
 });
 
@@ -290,7 +366,7 @@ router.post("/admin-reply-message", async (req, res) => {
 
     await AdminMessage.create({
       toUserId: userId,
-      text
+      text,
     });
 
     res.status(200).json({ message: "Admin message sent" });
@@ -300,10 +376,9 @@ router.post("/admin-reply-message", async (req, res) => {
   }
 });
 
-
 router.put("/mark-read/:userId", markMessageAsRead);
-router.get('/average-rating', getAverageRating);
-router.get('/total-income', totalIncome);
+router.get("/average-rating", getAverageRating);
+router.get("/total-income", totalIncome);
 
 router.get("/register", (req, res) => {
   const message = req.session.message;
@@ -365,7 +440,5 @@ router.post("/logout", (req, res) => {
     res.redirect("/admin/signin?logout=success");
   });
 });
-
-
 
 module.exports = router;

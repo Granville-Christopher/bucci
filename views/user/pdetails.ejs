@@ -93,7 +93,7 @@
                     <% if (product.colors && product.colors.length) { %>
                         <% product.colors.forEach(color=> { %>
                             <button class="btn text-center color-btn"
-                                style="background-color: <%= color %>; color: gray;" onclick="selectColor(this)">
+                                style="background-color: <%= color %>; color: white; border: 1px solid gray" onclick="selectColor(this)">
                                 <%= color %>
                             </button>
                             <% }) %>

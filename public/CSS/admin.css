@@ -437,16 +437,19 @@ canvas {
   overflow-y: scroll;
 
 }
+.table-container {
+  max-height: 300px;
+  overflow-y: scroll;
+}
 #session-message {
   /* Positioning */
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 0px;
+  right: 0px;
   z-index: 1000;
 
   /* Sizing and spacing */
   max-width: 350px;
-  padding: 15px 20px;
   margin: 0;
   /* Appearance */
   background-color: #d1ecf1;
@@ -503,15 +506,15 @@ canvas {
     height: max-content;
   }
   .chart-container-bar {
-    position: relative; /* Important for Chart.js tooltips/labels */
+    position: relative; 
     height: 800px;
     width: 100%;
-    overflow-y: hidden; /* **This enables vertical scrolling** if content exceeds height */
-    overflow-x: hidden; /* Prevent horizontal scroll if not needed */
-    padding-bottom: 10px; /* Add some padding at the bottom for aesthetics if scrolling */
+    overflow-y: hidden;
+    overflow-x: hidden;
+    padding-bottom: 10px;
   }
   .dashboard-wrapper {
-    flex-direction: column; /* Stack on small screens */
+    flex-direction: column;
     align-items: center;
   }
   #dashboard-metrics-legend-sm {
@@ -534,7 +537,13 @@ canvas {
     position: relative;
     flex-shrink: 0; /* Prevent shrinking of the container */
   }
-
+  .table-container {
+    max-height: 100px;
+    overflow-y: scroll;
+  }
+  .content-section > h5{
+    font-size: 14px;
+  }
   .admin-main {
     background-color: #d6d6d6;
     box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
@@ -563,22 +572,36 @@ canvas {
     padding: 20px;
     margin-left: 0 !important;
   }
+chat-sidebar {
+        width: 100%;
+        max-width: none; /* Overrides any larger max-width */
+        border: none;
+        border-radius: 0px;
+        background: rgb(223, 206, 162);
+        top: 70px; /* Positions it 70px from the top of the viewport */
+        transform: translateX(0); /* Ensures it's fully visible (not slid off-screen) */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Your specified shadow */
 
-  .chat-sidebar {
-    width: 100%;
-    max-width: none;
-    border: none;
-    border-radius: 0px;
-    background: rgb(223, 206, 162);
-    top: 70px;
-    transform: translateX(0);
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-  }
+        /* Additions for fixed positioning and full height below the top 70px */
+        position: fixed; /* Makes it fixed relative to the viewport */
+        left: 0; /* Aligns to the left edge */
+        height: calc(100vh - 70px); /* Makes it take up remaining viewport height */
+        z-index: 10; /* Ensures it's above other content (but below chat-main when active) */
+        padding: 15px; /* Re-add padding since Bootstrap's col-*-* padding was removed */
+    }
 
-  .chat-main {
-    width: 100%;
-    display: none;
-  }
+    .chat-main {
+        width: 100%;
+        display: none; /* **IMPORTANT:** This hides the main chat window by default on small screens */
+        
+        /* Additions for fixed positioning and full height for the main chat */
+        position: fixed; /* Makes it fixed relative to the viewport */
+        top: 70px; /* Positions it 70px from the top, same as sidebar */
+        left: 0; /* Aligns to the left edge */
+        height: calc(100vh - 70px); /* Takes up remaining viewport height */
+        z-index: 20; /* Higher z-index to ensure it overlays the sidebar when active */
+        padding: 15px; /* Re-add padding */
+    }
   .dashboard-metric > span {
     font-size: 10px !important;
   }
@@ -646,6 +669,10 @@ canvas {
     height: 60% !important; /* Make canvas fill the wrapper */
     border-radius: 10%;
   }
+   .chat-main {
+    width: 100%;
+    display: none;
+  }
 }
 /* 
 
@@ -681,8 +708,5 @@ canvas {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
   }
 
-  .chat-main {
-    width: 100%;
-    display: none;
-  }
+ 
 } */

@@ -87,145 +87,207 @@ let chartInstance = null; // Track the current chart instance
 
 function updateIncomeChart(incomeData) {
   const canvas = document.getElementById("income-chart");
-  const ctx = canvas.getContext("2d");
 
-  if (ctx) {
-    // Destroy the previous chart if it exists
-    if (chartInstance) {
-      chartInstance.destroy();
-    }
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      // Destroy the previous chart if it exists
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
 
-    // Create a new chart
-    chartInstance = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ], // Month labels
-        datasets: [
-          {
-            label: "Total Income (₦)",
-            data: [
-              incomeData.jan || 0,
-              incomeData.feb || 0,
-              incomeData.mar || 0,
-              incomeData.apr || 0,
-              incomeData.may || 0,
-              incomeData.jun || 0,
-              incomeData.jul || 0,
-              incomeData.aug || 0,
-              incomeData.sep || 0,
-              incomeData.oct || 0,
-              incomeData.nov || 0,
-              incomeData.dec || 0,
-            ],
-            borderColor: "#007bff",
-            borderWidth: 2,
-            fill: false,
-            tension: 0.3,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true },
+      // Create a new chart
+      chartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ], // Month labels
+          datasets: [
+            {
+              label: "Total Income (₦)",
+              data: [
+                incomeData.jan || 0,
+                incomeData.feb || 0,
+                incomeData.mar || 0,
+                incomeData.apr || 0,
+                incomeData.may || 0,
+                incomeData.jun || 0,
+                incomeData.jul || 0,
+                incomeData.aug || 0,
+                incomeData.sep || 0,
+                incomeData.oct || 0,
+                incomeData.nov || 0,
+                incomeData.dec || 0,
+              ],
+              borderColor: "#007bff",
+              borderWidth: 2,
+              fill: false,
+              tension: 0.3,
+            },
+          ],
         },
-      },
-    });
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
   }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   fetchTotalIncomeData();
 
-  document.getElementById("month-filter").addEventListener("change", () => {
-    fetchTotalIncomeData();
-  });
+  const monthFilter = document.getElementById("month-filter");
+  if (monthFilter) {
+    monthFilter.addEventListener("change", () => {
+      fetchTotalIncomeData();
+    });
+  } else {
+    console.error("Element with id 'month-filter' not found.");
+  }
 });
 
 // chat section
 // chat
 
+// function showChatList() {
+//   document.querySelector(".chat-sidebar").style.display = "block";
+//   document.querySelector(".chat-main").style.display = "none";
+// }
 function showChatList() {
-  document.querySelector(".chat-sidebar").style.display = "block";
-  document.querySelector(".chat-main").style.display = "none";
+    const chatSidebar = document.querySelector(".chat-sidebar");
+    const chatMain = document.querySelector(".chat-main");
+
+    // Only proceed if both elements exist to prevent errors
+    if (chatSidebar && chatMain) {
+        chatSidebar.style.display = "block"; // Make the chat sidebar visible
+        chatMain.style.display = "none";    // Hide the main chat window
+    } else {
+        // Log a warning if elements aren't found, which can happen if HTML IDs/classes are wrong
+        console.warn("Chat sidebar or main chat element not found for showChatList. Check your HTML.");
+    }
 }
 
-let lastMessageId = null;
-let currentUserId = null;
-let interval = setInterval(() => {}, 1000);
-function handleChatClick(element) {
-  const userId = element.getAttribute("data-userid");
-  const fullname = element.getAttribute("data-fullname");
-  const messages = JSON.parse(element.getAttribute("data-messages") || "[]");
-
-  currentUserId = userId; // 🔥 Needed for sendAdminMessage to work
-
-  // Mark messages as read on server
-  fetch("/admin/mark-messages-read", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ userId }),
-  });
-
-  // Set up chat window
-  const chatWindow = document.getElementById("chat-window");
-  chatWindow.innerHTML = `
-    <h6>${fullname}</h6>
-    <button onclick="fetchNewMessages()" class="btn btn-sm btn-outline-primary mb-2">Refresh</button>
-    <div class="chat-messages" style="max-height: 400px; overflow-y: auto;"></div>
-    
-    <div class="mt-3">
-      <textarea id="admin-reply" class="form-control" rows="2" placeholder="Type your message..."></textarea>
-      <button onclick="sendAdminMessage()" class="btn btn-primary mt-2">Send</button>
-    </div>
-  `;
-
-  // Load existing messages into chat
-  const chatMessages = chatWindow.querySelector(".chat-messages");
-  chatMessages.innerHTML = messages
-    .map((msg) => {
-      const isAdmin = msg.fullname === "Admin";
-      return `
-      <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
-        <div class="p-2 rounded ${
-          isAdmin ? "bg-primary text-white" : "bg-light"
-        }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"}; right">
-          ${msg.text}
-        </div>
-        <div style="clear: both;"></div>
-      </div>
-    `;
-    })
-    .join("");
-
+function scrollToLatest() {
+  const chatMessages = document.querySelector(".chat-messages");
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
-  // Store last message ID for incremental fetch
-  lastMessageId = messages.length ? messages[messages.length - 1]._id : null;
-
-  // Reset and start fetch interval
-  clearInterval(interval);
-  interval = setInterval(() => {
-    fetchNewMessages();
-  }, 1000);
+  // Hide the button after scrolling down
+  const jumpBtn = document.getElementById("jump-to-latest");
+  if (jumpBtn) jumpBtn.classList.add("d-none");
 }
+let lastMessageId = null;
+let currentUserId = null;
+// Initialize interval to null. It will be set later when a chat is opened.
+let interval = null;
 
+function handleChatClick(element) {
+    const userId = element.getAttribute("data-userid");
+    const fullname = element.getAttribute("data-fullname");
+    const messages = JSON.parse(element.getAttribute("data-messages") || "[]");
+
+    currentUserId = userId; // Needed for sendAdminMessage to work
+
+    // --- CONDITIONAL MOBILE VIEW TOGGLE LOGIC ---
+    // Check if the screen is considered "small" (e.g., less than 768px wide)
+    // This matches the typical breakpoint for Bootstrap's 'md' (medium) size.
+    if (window.innerWidth < 768) {
+        const chatSidebar = document.querySelector(".chat-sidebar");
+        const chatMain = document.querySelector(".chat-main");
+
+        if (chatSidebar && chatMain) {
+            chatSidebar.style.display = "none";      // Hide the chat sidebar (list)
+            chatMain.style.display = "flex";        // Show the main chat window
+        } else {
+            console.warn("Chat sidebar or main chat element not found. Cannot toggle view on small screen.");
+            return; // Exit if essential elements aren't found for mobile toggle
+        }
+    }
+    // --- END CONDITIONAL MOBILE VIEW TOGGLE LOGIC ---
+
+
+    // Mark messages as read on server
+    fetch("/admin/mark-messages-read", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+    })
+    .catch(err => console.error("Error marking messages read:", err));
+
+    // Set up chat window
+    const chatWindow = document.getElementById("chat-window");
+    if (!chatWindow) {
+        console.error("Chat window (chat-content) not found.");
+        return;
+    }
+
+    // Use your original `chat-messages` class and style for the inner div
+    chatWindow.innerHTML = `
+        <h6>${fullname}</h6>
+        <button onclick="fetchNewMessages()" class="btn btn-sm btn-outline-primary mb-2">Refresh</button>
+        <div class="chat-messages" style="max-height: 400px; overflow-y: auto;"></div>
+        <button id="jump-to-latest" class="btn btn-sm btn-secondary mt-2" onclick="scrollToLatest()">
+            Jump to Latest
+        </button>
+        
+        <div class="mt-3">
+            <textarea id="admin-reply" class="form-control" rows="2" placeholder="Type your message..."></textarea>
+            <button onclick="sendAdminMessage()" class="btn btn-primary mt-2">Send</button>
+        </div>
+    `;
+
+    // Load existing messages into chat
+    // Select the div with class "chat-messages" as per your preference
+    const chatMessages = chatWindow.querySelector(".chat-messages");
+    if (chatMessages) {
+        chatMessages.innerHTML = messages
+            .map((msg) => {
+                const isAdmin = msg.fullname === "Admin" || msg.fromAdmin; // Added `|| msg.fromAdmin` for robustness
+                return `
+                    <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
+                        <div class="p-2 rounded ${
+                            isAdmin ? "bg-primary text-white" : "bg-light"
+                        }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
+                            ${msg.text}
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+                `;
+            })
+            .join("");
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Store last message ID for incremental fetch
+    lastMessageId = messages.length ? messages[messages.length - 1]._id : null;
+
+    // Reset and start fetch interval
+    if (interval) { // Clear existing interval if any
+        clearInterval(interval);
+    }
+    interval = setInterval(() => {
+        fetchNewMessages();
+    }, 1000);
+}
 function sendAdminMessage() {
   const message = document.getElementById("admin-reply").value.trim();
   if (!message || !currentUserId) return;
@@ -255,10 +317,10 @@ function sendAdminMessage() {
       if (!response.ok) {
         throw new Error("Failed to send message");
       }
-      return response.json(); // if needed
+      return response.json();
     })
     .then(() => {
-      fetchNewMessages(); // 👈 force refresh right after sending
+      fetchNewMessages();
     })
     .catch((err) => {
       console.error("Error sending message:", err);
@@ -274,7 +336,7 @@ async function fetchNewMessages() {
 
     const messages = [...data.userMessages, ...data.adminMessages];
 
-    // Sort by time (optional)
+    // Sort by time
     messages.sort(
       (a, b) =>
         new Date(a.sentAt || a.createdAt) - new Date(b.sentAt || b.createdAt)
@@ -282,30 +344,50 @@ async function fetchNewMessages() {
 
     const chatMessages = document.querySelector(".chat-messages");
 
+    // Check if user is near bottom BEFORE rendering new messages
+    const isAtBottom =
+      chatMessages.scrollHeight - chatMessages.scrollTop <= chatMessages.clientHeight + 50;
+
+    // Render messages
     chatMessages.innerHTML = messages
       .map((msg) => {
-        const isAdmin = msg.toUserId !== undefined; // admin messages have toUserId, not userId
+        const isAdmin = msg.toUserId !== undefined;
         return `
-        <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
-          <div class="p-2 rounded ${
-            isAdmin ? "bg-primary text-white" : "bg-light"
-          }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
-            ${msg.text}
+          <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
+            <div class="p-2 rounded ${
+              isAdmin ? "bg-primary text-white" : "bg-light"
+            }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
+              ${msg.text}
+            </div>
+            <div style="clear: both;"></div>
           </div>
-          <div style="clear: both;"></div>
-        </div>
-      `;
+        `;
       })
       .join("");
 
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Auto-scroll only if user was already at the bottom
+    if (isAtBottom) {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Show/hide the "Jump to Latest" button
+    const jumpBtn = document.getElementById("jump-to-latest");
+    if (jumpBtn) {
+      if (!isAtBottom) {
+        jumpBtn.classList.remove("d-none");
+      } else {
+        jumpBtn.classList.add("d-none");
+      }
+    }
+
   } catch (err) {
     console.error("❌ Error fetching messages:", err);
   }
 }
 
+
 document.addEventListener("DOMContentLoaded", function () {
-  let lastSeenMessages = {}; // userId -> latest message timestamp
+  let lastSeenMessages = {};
 
   function fetchMessages() {
     fetch("/admin/get-sidebar-messages")
@@ -403,6 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   fetchMessages();
 });
+
 document.addEventListener(
   "click",
   () => {
@@ -565,22 +648,6 @@ function fetchDashboardStats() {
     });
 }
 
-// function fetchAverageRating() {
-//   fetch("/admin/average-rating")
-//     .then((response) => {
-//       if (!response.ok) {
-//         throw new Error(`HTTP error! status: ${response.status}`);
-//       }
-//       return response.json();
-//     })
-//     .then((data) => {
-//       document.getElementById("avg-rating").textContent = data.averageRating;
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching average rating:", error);
-//     });
-// }
-
 // Global variable to hold the chart instance
 let averageRatingChartInstance = null;
 
@@ -594,11 +661,10 @@ function fetchAverageRating() {
       return response.json();
     })
     .then((data) => {
-      // Check if data.averageRating exists and is a number, otherwise default to 0
       const averageRating =
         typeof data.averageRating === "number"
           ? data.averageRating
-          : parseFloat(data.averageRating) || 0; // Tries to parse string or defaults to 0
+          : parseFloat(data.averageRating) || 0;
 
       document.getElementById("avg-rating").textContent =
         averageRating.toFixed(1);
@@ -606,8 +672,11 @@ function fetchAverageRating() {
     })
     .catch((error) => {
       console.error("Error fetching average rating:", error);
-      document.getElementById("avg-rating").textContent = "N/A"; // Display N/A on error
-      createAverageRatingChart(0); // Show an empty chart (fully gray) on error
+      const avgRatingEl = document.getElementById("avg-rating");
+      if (avgRatingEl) {
+        avgRatingEl.textContent = averageRating.toFixed(1);
+      }
+      createAverageRatingChart(averageRating);
     });
 }
 
@@ -731,8 +800,8 @@ function createOrdersByStateChart(labels, data) {
       },
     },
     plugins: [ChartDataLabels], // Keep this if you use ChartDataLabels for other charts,
-                                // but for this specific chart, 'display: false' in options
-                                // will override its rendering.
+    // but for this specific chart, 'display: false' in options
+    // will override its rendering.
   });
 }
 // Call fetchOrdersByState when the DOM is loaded
@@ -798,6 +867,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableContainer =
       document.getElementById(`${sectionId}-table-container`) ||
       document.getElementById(`${sectionId}-table-responsive`);
+
+    if (!btn || !input || !resultDiv || !tableContainer) {
+      console.error("One or more search elements not found.");
+      return;
+    }
 
     btn.addEventListener("click", async () => {
       const paymentReference = input.value.trim();
@@ -886,49 +960,110 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSearch("failed", "failed");
 });
 
-//  document.addEventListener('DOMContentLoaded', function () {
-//     const ctx = document.getElementById('ordersChart').getContext('2d');
+// producttable scroll function
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("scroll-container");
+  const tableBody = document.getElementById("product-list");
+  let isLoading = false;
 
-//     const totalOrders = 150; // Example value
-//     const totalSales = 50000; // Example value (₦)
-//     const successfulPayments = 120;
-//     const failedPayments = 30;
+  container.addEventListener("scroll", async () => {
+    const scrollBottom = container.scrollTop + container.clientHeight;
+    const nearBottom = scrollBottom >= container.scrollHeight - 10;
 
-//     const chart = new Chart(ctx, {
-//       type: 'doughnut',
-//       data: {
-//         labels: ['Successful Payments', 'Failed Payments', 'Total Sales', 'Total Orders'],
-//         datasets: [{
-//           data: [successfulPayments, failedPayments, totalSales, totalOrders],
-//           backgroundColor: ['#28a745', '#dc3545', '#a6e3a1', '#ccc'],
-//           borderWidth: 2,
-//         }]
-//       },
-//       options: {
-//         cutout: '60%',
-//         plugins: {
-//           legend: {
-//             position: 'bottom',
-//             labels: {
-//               color: '#333',
-//               font: {
-//                 size: 14
-//               }
-//             }
-//           },
-//           tooltip: {
-//             callbacks: {
-//               label: function (tooltipItem) {
-//                 const label = tooltipItem.label;
-//                 const value = tooltipItem.raw;
-//                 if (label === 'Total Sales') {
-//                   return `${label}: ₦${value.toLocaleString()}`;
-//                 }
-//                 return `${label}: ${value}`;
-//               }
-//             }
-//           }
-//         }
-//       }
-//     });
-//   });
+    if (nearBottom && !isLoading) {
+      isLoading = true;
+
+      let currentPage = parseInt(tableBody.getAttribute("data-page") || "1");
+      const nextPage = currentPage + 1;
+
+      try {
+        const res = await fetch(`/admin/products?page=${nextPage}`);
+        const data = await res.json();
+
+        if (data.products.length === 0) {
+          return;
+        }
+
+        data.products.forEach((product) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><img src="${product.product_images[0]}" alt="${product.product_name}" class="img-thumbnail" style="width: 50px; height: 50px;"></td>
+            <td class="text-center">${product.product_name}</td>
+            <td class="text-center">${product.brand}</td>
+            <td class="text-center">${product.quantity}</td>
+            <td class="text-center">
+              <a href="/admin/product/${product._id}" class="btn btn-sm btn-primary">View</a>
+              <form action="/admin/delete-product/${product._id}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        tableBody.setAttribute("data-page", nextPage);
+      } catch (error) {
+        console.error("Scroll loading error:", error);
+      } finally {
+        isLoading = false;
+      }
+    }
+  });
+
+  const custContainer = document.getElementById("scroll-cont-2");
+  const tableBodyCust = document.getElementById("customer-list");
+  let isLoadingCust = false;
+
+  const scrollHandler = async () => {
+    const scrollBottom = custContainer.scrollTop + custContainer.clientHeight;
+    const nearBottom = scrollBottom >= custContainer.scrollHeight - 10;
+
+    if (nearBottom && !isLoadingCust) {
+      isLoadingCust = true;
+
+      let currentPage = parseInt(
+        tableBodyCust.getAttribute("data-page") || "1"
+      );
+      const nextPage = currentPage + 1;
+
+      try {
+        const res = await fetch(`/admin/customers?page=${nextPage}`);
+        const data = await res.json();
+
+        if (data.users.length === 0 || data.hasMore === false) {
+          custContainer.removeEventListener("scroll", scrollHandler);
+          return;
+        }
+
+        data.users.forEach((user) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td>${user.fullname}</td>
+          <td>${user.email}</td>
+          <td>${user.phone}</td>
+          <td>${user.totalOrders}</td>
+          <td>${user.completedOrders}</td>
+          <td>${user.pendingOrders}</td>
+          <td class="text-center">
+            <div class="btn-group">
+              <a href="/admin/viewcustomer/${user._id}" class="btn btn-info btn-sm">
+                <i class="fa fa-eye"></i> View
+              </a>
+              <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</button>
+            </div>
+          </td>
+        `;
+          tableBodyCust.appendChild(row);
+        });
+
+        tableBodyCust.setAttribute("data-page", nextPage);
+      } catch (error) {
+        console.error("Scroll loading error:", error);
+      } finally {
+        isLoadingCust = false;
+      }
+    }
+  };
+
+  custContainer.addEventListener("scroll", scrollHandler);
+});
