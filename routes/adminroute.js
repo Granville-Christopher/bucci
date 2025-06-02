@@ -219,7 +219,7 @@ router.get("/products", async (req, res) => {
 });
 router.get("/customers", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = 3;
+  const limit = 10;
   const skip = (page - 1) * limit;
 
   try {

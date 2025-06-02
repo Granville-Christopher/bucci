@@ -171,17 +171,17 @@ document.addEventListener("DOMContentLoaded", function () {
 //   document.querySelector(".chat-main").style.display = "none";
 // }
 function showChatList() {
-    const chatSidebar = document.querySelector(".chat-sidebar");
-    const chatMain = document.querySelector(".chat-main");
+  const chatSidebar = document.querySelector(".chat-sidebar");
+  const chatMain = document.querySelector(".chat-main");
 
-    // Only proceed if both elements exist to prevent errors
-    if (chatSidebar && chatMain) {
-        chatSidebar.style.display = "block"; // Make the chat sidebar visible
-        chatMain.style.display = "none";    // Hide the main chat window
-    } else {
-        // Log a warning if elements aren't found, which can happen if HTML IDs/classes are wrong
-        console.warn("Chat sidebar or main chat element not found for showChatList. Check your HTML.");
-    }
+  // Only proceed if both elements exist to prevent errors
+  if (chatSidebar && chatMain) {
+    chatSidebar.style.display = "block"; // Make the chat sidebar visible
+    chatMain.style.display = "none";    // Hide the main chat window
+  } else {
+    // Log a warning if elements aren't found, which can happen if HTML IDs/classes are wrong
+    console.warn("Chat sidebar or main chat element not found for showChatList. Check your HTML.");
+  }
 }
 
 function scrollToLatest() {
@@ -198,49 +198,49 @@ let currentUserId = null;
 let interval = null;
 
 function handleChatClick(element) {
-    const userId = element.getAttribute("data-userid");
-    const fullname = element.getAttribute("data-fullname");
-    const messages = JSON.parse(element.getAttribute("data-messages") || "[]");
+  const userId = element.getAttribute("data-userid");
+  const fullname = element.getAttribute("data-fullname");
+  const messages = JSON.parse(element.getAttribute("data-messages") || "[]");
 
-    currentUserId = userId; // Needed for sendAdminMessage to work
+  currentUserId = userId; // Needed for sendAdminMessage to work
 
-    // --- CONDITIONAL MOBILE VIEW TOGGLE LOGIC ---
-    // Check if the screen is considered "small" (e.g., less than 768px wide)
-    // This matches the typical breakpoint for Bootstrap's 'md' (medium) size.
-    if (window.innerWidth < 768) {
-        const chatSidebar = document.querySelector(".chat-sidebar");
-        const chatMain = document.querySelector(".chat-main");
+  // --- CONDITIONAL MOBILE VIEW TOGGLE LOGIC ---
+  // Check if the screen is considered "small" (e.g., less than 768px wide)
+  // This matches the typical breakpoint for Bootstrap's 'md' (medium) size.
+  if (window.innerWidth < 768) {
+    const chatSidebar = document.querySelector(".chat-sidebar");
+    const chatMain = document.querySelector(".chat-main");
 
-        if (chatSidebar && chatMain) {
-            chatSidebar.style.display = "none";      // Hide the chat sidebar (list)
-            chatMain.style.display = "flex";        // Show the main chat window
-        } else {
-            console.warn("Chat sidebar or main chat element not found. Cannot toggle view on small screen.");
-            return; // Exit if essential elements aren't found for mobile toggle
-        }
+    if (chatSidebar && chatMain) {
+      chatSidebar.style.display = "none";      // Hide the chat sidebar (list)
+      chatMain.style.display = "flex";        // Show the main chat window
+    } else {
+      console.warn("Chat sidebar or main chat element not found. Cannot toggle view on small screen.");
+      return; // Exit if essential elements aren't found for mobile toggle
     }
-    // --- END CONDITIONAL MOBILE VIEW TOGGLE LOGIC ---
+  }
+  // --- END CONDITIONAL MOBILE VIEW TOGGLE LOGIC ---
 
 
-    // Mark messages as read on server
-    fetch("/admin/mark-messages-read", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-    })
+  // Mark messages as read on server
+  fetch("/admin/mark-messages-read", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId }),
+  })
     .catch(err => console.error("Error marking messages read:", err));
 
-    // Set up chat window
-    const chatWindow = document.getElementById("chat-window");
-    if (!chatWindow) {
-        console.error("Chat window (chat-content) not found.");
-        return;
-    }
+  // Set up chat window
+  const chatWindow = document.getElementById("chat-window");
+  if (!chatWindow) {
+    console.error("Chat window (chat-content) not found.");
+    return;
+  }
 
-    // Use your original `chat-messages` class and style for the inner div
-    chatWindow.innerHTML = `
+  // Use your original `chat-messages` class and style for the inner div
+  chatWindow.innerHTML = `
         <h6>${fullname}</h6>
         <button onclick="fetchNewMessages()" class="btn btn-sm btn-outline-primary mb-2">Refresh</button>
         <div class="chat-messages" style="max-height: 400px; overflow-y: auto;"></div>
@@ -254,39 +254,38 @@ function handleChatClick(element) {
         </div>
     `;
 
-    // Load existing messages into chat
-    // Select the div with class "chat-messages" as per your preference
-    const chatMessages = chatWindow.querySelector(".chat-messages");
-    if (chatMessages) {
-        chatMessages.innerHTML = messages
-            .map((msg) => {
-                const isAdmin = msg.fullname === "Admin" || msg.fromAdmin; // Added `|| msg.fromAdmin` for robustness
-                return `
+  // Load existing messages into chat
+  // Select the div with class "chat-messages" as per your preference
+  const chatMessages = chatWindow.querySelector(".chat-messages");
+  if (chatMessages) {
+    chatMessages.innerHTML = messages
+      .map((msg) => {
+        const isAdmin = msg.fullname === "Admin" || msg.fromAdmin; // Added `|| msg.fromAdmin` for robustness
+        return `
                     <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
-                        <div class="p-2 rounded ${
-                            isAdmin ? "bg-primary text-white" : "bg-light"
-                        }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
+                        <div class="p-2 rounded ${isAdmin ? "bg-primary text-white" : "bg-light"
+          }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
                             ${msg.text}
                         </div>
                         <div style="clear: both;"></div>
                     </div>
                 `;
-            })
-            .join("");
+      })
+      .join("");
 
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 
-    // Store last message ID for incremental fetch
-    lastMessageId = messages.length ? messages[messages.length - 1]._id : null;
+  // Store last message ID for incremental fetch
+  lastMessageId = messages.length ? messages[messages.length - 1]._id : null;
 
-    // Reset and start fetch interval
-    if (interval) { // Clear existing interval if any
-        clearInterval(interval);
-    }
-    interval = setInterval(() => {
-        fetchNewMessages();
-    }, 1000);
+  // Reset and start fetch interval
+  if (interval) { // Clear existing interval if any
+    clearInterval(interval);
+  }
+  interval = setInterval(() => {
+    fetchNewMessages();
+  }, 1000);
 }
 function sendAdminMessage() {
   const message = document.getElementById("admin-reply").value.trim();
@@ -354,9 +353,8 @@ async function fetchNewMessages() {
         const isAdmin = msg.toUserId !== undefined;
         return `
           <div class="message ${isAdmin ? "admin-message" : "user-message"} mb-2">
-            <div class="p-2 rounded ${
-              isAdmin ? "bg-primary text-white" : "bg-light"
-            }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
+            <div class="p-2 rounded ${isAdmin ? "bg-primary text-white" : "bg-light"
+          }" style="max-width: 75%; float: ${isAdmin ? "right" : "left"};">
               ${msg.text}
             </div>
             <div style="clear: both;"></div>
@@ -435,19 +433,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
           messages.forEach((msg) => {
             const li = document.createElement("li");
-            li.className = `list-group-item chat-item ${
-              msg.unread ? "fw-bold" : "text-muted"
-            }`;
+            li.className = `list-group-item chat-item ${msg.unread ? "fw-bold" : "text-muted"
+              }`;
             li.dataset.userid = msg.userId;
             li.dataset.fullname = msg.fullname;
             li.dataset.messages = JSON.stringify(msg.allMessages || []);
             li.setAttribute("onclick", "handleChatClick(this)");
             li.innerHTML = `<strong>${msg.fullname}</strong><br>
-                          <span>${
-                            msg.text.length > 30
-                              ? msg.text.slice(0, 30) + "..."
-                              : msg.text
-                          }</span>`;
+                          <span>${msg.text.length > 30
+                ? msg.text.slice(0, 30) + "..."
+                : msg.text
+              }</span>`;
             chatList.appendChild(li);
           });
 
@@ -497,7 +493,7 @@ document.addEventListener(
           audio.pause();
           audio.currentTime = 0;
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   },
   { once: true }
@@ -915,9 +911,8 @@ document.addEventListener("DOMContentLoaded", () => {
         order.items.forEach((item) => {
           itemsHtml += `
             <li>
-              ${item.productName || item.name || "Item"} - Quantity: ${
-            item.quantity
-          } - Price: ${item.price}
+              ${item.productName || item.name || "Item"} - Quantity: ${item.quantity
+            } - Price: ${item.price}
             </li>
           `;
         });
@@ -926,11 +921,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>Order Details</h4>
           <p><strong>Name:</strong> ${order.fullname}</p>
           <p><strong>Payment Reference:</strong> ${order.paymentReference}</p>
-          <p><strong>Order Status:</strong> ${
-            order.status || order.orderStatus
+          <p><strong>Order Status:</strong> ${order.status || order.orderStatus
           }</p>
-          <p><strong>Payment Status:</strong> ${
-            order.paymentStatus || "N/A"
+          <p><strong>Payment Status:</strong> ${order.paymentStatus || "N/A"
           }</p>
           <p><strong>Order Date:</strong> ${new Date(
             order.orderDate || order.paymentDate
@@ -1066,4 +1059,73 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   custContainer.addEventListener("scroll", scrollHandler);
+
+
+  const loadInitialCustomers = async () => {
+    try {
+      const res = await fetch(`/admin/customers?page=1`);
+      const data = await res.json();
+
+      if (!data.users || data.users.length === 0) return;
+
+      data.users.forEach((user) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${user.fullname}</td>
+          <td>${user.email}</td>
+          <td>${user.phone}</td>
+          <td>${user.totalOrders}</td>
+          <td>${user.completedOrders}</td>
+          <td>${user.pendingOrders}</td>
+          <td class="text-center">
+            <div class="btn-group">
+              <a href="/admin/viewcustomer/${user._id}" class="btn btn-info btn-sm">
+                <i class="fa fa-eye"></i> View
+              </a>
+              <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</button>
+            </div>
+          </td>
+        `;
+        tableBodyCust.appendChild(row);
+      });
+
+      tableBodyCust.setAttribute("data-page", "1");
+    } catch (error) {
+      console.error("Initial load error:", error);
+    }
+  };
+
+  const loadInitialProducts = async () => {
+    try {
+      const res = await fetch(`/admin/products?page=1`);
+      const data = await res.json();
+
+      if (!data.products || data.products.length === 0) return;
+
+      data.products.forEach((product) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td><img src="${product.product_images[0]}" alt="${product.product_name}" class="img-thumbnail" style="width: 50px; height: 50px;"></td>
+        <td class="text-center">${product.product_name}</td>
+        <td class="text-center">${product.brand}</td>
+        <td class="text-center">${product.quantity}</td>
+        <td class="text-center">
+          <a href="/admin/product/${product._id}" class="btn btn-sm btn-primary">View</a>
+          <form action="/admin/delete-product/${product._id}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure?')">
+            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+          </form>
+        </td>
+      `;
+        tableBody.appendChild(row);
+      });
+
+      tableBody.setAttribute("data-page", "1");
+    } catch (error) {
+      console.error("Initial load error:", error);
+    }
+  };
+
+  loadInitialProducts();
+  loadInitialCustomers();
+
 });
